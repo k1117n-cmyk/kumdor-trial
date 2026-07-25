@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 // プレイヤーの状態を管理するビットフラグ
 #define STATUS_NORMAL 0x00  // 正常
 #define STATUS_POISON 0x01  // 毒（攻撃力が下がる）
-#define STATUS_BLIND  0x02  // 暗闇（敵の文字が見えにくくなる）
+#define STATUS_BLIND  0x02  // 暗闇（敵の単語が見えにくくなる）
 
-#define PRACTICE_CHARS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{};:'\",.<>/?\\|`~"
+#define INPUT_BUFFER_SIZE 32
+#define INPUT_SCAN_FORMAT " %31s"
 
 typedef struct {
     const char *name;
@@ -26,18 +28,31 @@ typedef struct {
 void print_title(void);
 void apply_opening_status(Player *player);
 void print_battle_status(const Player *player, const Enemy *enemy);
-char choose_target(const char words[], int word_count);
-int read_input(char *input);
-int is_correct_input(char input, char target);
-void player_turn(Player *player, Enemy *enemy, char target);
+const char *choose_target(const char *words[], int word_count);
+int read_input(char input[]);
+int is_correct_input(const char input[], const char target[]);
+void player_turn(Player *player, Enemy *enemy, const char target[]);
 void enemy_turn(Player *player, const Enemy *enemy);
 
 int main(void) {
     // 乱数の初期化
     srand((unsigned int)time(NULL));
 
-    const char words[] = PRACTICE_CHARS;
-    int word_count = (int)sizeof(words) - 1;
+    const char *words[] = {
+        "SWORD",
+        "MAGIC",
+        "SHIELD",
+        "DRAGON",
+        "Crystal",
+        "Knight",
+        "potion",
+        "castle",
+        "Lv10",
+        "HP-2",
+        "Fire!",
+        "Guard?"
+    };
+    int word_count = (int)(sizeof(words) / sizeof(words[0]));
 
     // ゲームのステータス変数
     Player player = {"あなた", 10, 10, STATUS_NORMAL};
@@ -49,7 +64,7 @@ int main(void) {
 
     // メインゲームループ
     while (player.hp > 0 && enemy.hp > 0) {
-        char target = choose_target(words, word_count);
+        const char *target = choose_target(words, word_count);
 
         print_battle_status(&player, &enemy);
         player_turn(&player, &enemy, target);
@@ -72,7 +87,7 @@ void print_title(void) {
     printf("=========================================\n");
     printf("     タイピングRPG ★ クムドールの試練     \n");
     printf("=========================================\n");
-    printf("現れた文字をそのまま正確にタイプして、敵を倒せ！\n\n");
+    printf("現れた単語をそのまま正確にタイプして、敵を倒せ！\n\n");
 }
 
 void apply_opening_status(Player *player) {
@@ -96,42 +111,42 @@ void print_battle_status(const Player *player, const Enemy *enemy) {
            enemy->max_hp);
 }
 
-char choose_target(const char words[], int word_count) {
-    // 今回タイピングする文字をランダムに決定
+const char *choose_target(const char *words[], int word_count) {
+    // 今回タイピングする単語をランダムに決定
     return words[rand() % word_count];
 }
 
-int read_input(char *input) {
-    printf("タイプキーを入力してEnter: ");
-    return scanf(" %c", input) == 1; // 頭のスペースで改行を読み飛ばすC言語のテクニック
+int read_input(char input[]) {
+    printf("単語を入力してEnter: ");
+    return scanf(INPUT_SCAN_FORMAT, input) == 1;
 }
 
-int is_correct_input(char input, char target) {
-    return input == target;
+int is_correct_input(const char input[], const char target[]) {
+    return strcmp(input, target) == 0;
 }
 
-void player_turn(Player *player, Enemy *enemy, char target) {
-    char input;
+void player_turn(Player *player, Enemy *enemy, const char target[]) {
+    char input[INPUT_BUFFER_SIZE];
 
     // 暗闇フラグ（ビット演算）のチェック
     if (player->status & STATUS_BLIND) {
-        printf("敵の構え: [ %c ] (視界が悪い！正確に打ち込め！)\n", target);
+        printf("敵の構え: [ %s ] (視界が悪い！正確に打ち込め！)\n", target);
     } else {
-        printf("敵の構え: [ %c ]\n", target);
+        printf("敵の構え: [ %s ]\n", target);
     }
 
-    if (!read_input(&input)) {
+    if (!read_input(input)) {
         printf("➔ 入力が読み取れなかった！ ターンを失った！\n");
         return;
     }
 
-    // 文字が一致しているか判定
+    // 単語が一致しているか判定
     if (is_correct_input(input, target)) {
         // 毒フラグ（ビット演算）のチェック
         if (player->status & STATUS_POISON) {
             printf("➔ 毒のせいで力が出ない！ 0.5のダメージ！\n");
             // 実数計算を避けるため、今回はHPを2回的中させて1減らす仕様を簡易再現（ここでは0ダメージ扱い）
-            printf("（もう一度同じ文字を的中させろ！）\n");
+            printf("（もう一度同じ単語を的中させろ！）\n");
             player->status &= ~STATUS_POISON; // 毒を解除
         } else {
             enemy->hp--;

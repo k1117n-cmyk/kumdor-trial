@@ -1,3 +1,4 @@
 kumdor_01
 *.o
 *.out
+.DS_Store

@@ -2,7 +2,7 @@
 
 この文書は、`kumdor_01.c` の現在のコードを理解するための解説です。
 
-このゲームは、ターミナル上で遊ぶタイピングRPGです。画面に表示された英字、数字、記号をそのまま入力し、正解すると敵にダメージを与えます。敵のHPを0にすれば勝利、プレイヤーのHPが0になると敗北です。
+このゲームは、ターミナル上で遊ぶタイピングRPGです。画面に表示された英字、数字、記号を含む単語をそのまま入力し、正解すると敵にダメージを与えます。敵のHPを0にすれば勝利、プレイヤーのHPが0になると敗北です。
 
 ## 全体の構成
 
@@ -22,6 +22,7 @@
 ```c
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 ```
 
@@ -31,9 +32,10 @@
 | --- | --- |
 | `stdio.h` | `printf`, `scanf` |
 | `stdlib.h` | `rand`, `srand` |
+| `string.h` | `strcmp` |
 | `time.h` | 乱数の初期化に使う `time` |
 
-現在の判定は、表示された文字と入力された文字が完全一致した場合だけ正解になります。ブラインドタッチ練習向けに、大文字と小文字は別の文字として扱います。
+現在の判定は、表示された単語と入力された単語が完全一致した場合だけ正解になります。ブラインドタッチ練習向けに、大文字と小文字は別の文字として扱います。
 
 ## 状態異常のビットフラグ
 
@@ -123,10 +125,10 @@ Enemy enemy = {"クムドールの影", 3, 3, 2};
 void print_title(void);
 void apply_opening_status(Player *player);
 void print_battle_status(const Player *player, const Enemy *enemy);
-char choose_target(const char words[], int word_count);
-int read_input(char *input);
-int is_correct_input(char input, char target);
-void player_turn(Player *player, Enemy *enemy, char target);
+const char *choose_target(const char *words[], int word_count);
+int read_input(char input[]);
+int is_correct_input(const char input[], const char target[]);
+void player_turn(Player *player, Enemy *enemy, const char target[]);
 void enemy_turn(Player *player, const Enemy *enemy);
 ```
 
@@ -146,13 +148,26 @@ int main(void) {
 ここで乱数を初期化しています。`rand()` はそのままだと毎回同じ順番の乱数になるため、現在時刻を使って毎回違う結果になりやすくしています。
 
 ```c
-const char words[] = PRACTICE_CHARS;
-int word_count = (int)sizeof(words) - 1;
+const char *words[] = {
+    "SWORD",
+    "MAGIC",
+    "SHIELD",
+    "DRAGON",
+    "Crystal",
+    "Knight",
+    "potion",
+    "castle",
+    "Lv10",
+    "HP-2",
+    "Fire!",
+    "Guard?"
+};
+int word_count = (int)(sizeof(words) / sizeof(words[0]));
 ```
 
-`words` はタイピング対象になる文字列です。英大文字、英小文字、数字、記号が入ります。
+`words` はタイピング対象になる単語の配列です。英大文字、英小文字、数字、記号を含む単語が入ります。
 
-`word_count` は出題対象の文字数です。文字列の最後には終端文字 `'\0'` が入るため、`sizeof(words) - 1` にしています。
+`word_count` は出題対象の単語数です。配列全体のサイズを、配列要素1つ分のサイズで割って求めています。
 
 ```c
 Player player = {"あなた", 10, 10, STATUS_NORMAL};
@@ -181,7 +196,7 @@ while (player.hp > 0 && enemy.hp > 0) {
 
 1ターンの流れは次の通りです。
 
-1. タイピング対象の文字をランダムに選ぶ
+1. タイピング対象の単語をランダムに選ぶ
 2. 現在のHPを表示する
 3. プレイヤーが入力して攻撃する
 4. タイプミスすると敵が反撃する
@@ -190,7 +205,7 @@ while (player.hp > 0 && enemy.hp > 0) {
 該当コードは次の部分です。
 
 ```c
-char target = choose_target(words, word_count);
+const char *target = choose_target(words, word_count);
 
 print_battle_status(&player, &enemy);
 player_turn(&player, &enemy, target);
@@ -216,15 +231,23 @@ if (player.hp > 0) {
 
 敵のHPが0になれば勝利です。プレイヤーのHPが0になれば敗北です。
 
-## PRACTICE_CHARS 定数
+## words 配列
 
 ```c
-#define PRACTICE_CHARS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789..."
+const char *words[] = {
+    "SWORD",
+    "MAGIC",
+    "SHIELD",
+    "Lv10",
+    "HP-2",
+    "Fire!",
+    "Guard?"
+};
 ```
 
-`PRACTICE_CHARS` は出題対象の文字をまとめた定数です。
+`words` は出題対象の単語をまとめた配列です。
 
-大文字と小文字は別の文字として入っているため、`A` が出たときに `a` と入力しても不正解になります。
+大文字と小文字は別の文字として扱うため、`SWORD` が出たときに `sword` と入力しても不正解になります。
 
 ## print_title 関数
 
@@ -233,7 +256,7 @@ void print_title(void) {
     printf("=========================================\n");
     printf("     タイピングRPG ★ クムドールの試練     \n");
     printf("=========================================\n");
-    printf("現れた文字を正確にタイプして、敵を倒せ！\n\n");
+    printf("現れた単語をそのまま正確にタイプして、敵を倒せ！\n\n");
 }
 ```
 
@@ -288,27 +311,27 @@ void print_battle_status(const Player *player, const Enemy *enemy) {
 ## choose_target 関数
 
 ```c
-char choose_target(const char words[], int word_count) {
+const char *choose_target(const char *words[], int word_count) {
     return words[rand() % word_count];
 }
 ```
 
-タイピング対象の文字をランダムに1つ選びます。
+タイピング対象の単語をランダムに1つ選びます。
 
-`rand() % word_count` によって、`0` から `word_count - 1` までの番号を作り、その番号に対応する文字を返しています。
+`rand() % word_count` によって、`0` から `word_count - 1` までの番号を作り、その番号に対応する単語を返しています。
 
 ## read_input 関数
 
 ```c
-int read_input(char *input) {
-    printf("タイプキーを入力してEnter: ");
-    return scanf(" %c", input) == 1;
+int read_input(char input[]) {
+    printf("単語を入力してEnter: ");
+    return scanf(INPUT_SCAN_FORMAT, input) == 1;
 }
 ```
 
-プレイヤーの入力を1文字読み取る関数です。
+プレイヤーの入力を単語として読み取る関数です。
 
-`scanf(" %c", input)` の `" %c"` には、先頭に空白があります。この空白には、前回入力された改行などの空白文字を読み飛ばす効果があります。
+`scanf(INPUT_SCAN_FORMAT, input)` は、前回入力された改行などの空白文字を読み飛ばし、最大31文字まで読み取ります。`input` の配列サイズは32なので、終端文字 `'\0'` を入れる余地を残しています。
 
 戻り値は、入力に成功したかどうかです。
 
@@ -322,7 +345,7 @@ int read_input(char *input) {
 ## player_turn 関数
 
 ```c
-void player_turn(Player *player, Enemy *enemy, char target)
+void player_turn(Player *player, Enemy *enemy, const char target[])
 ```
 
 プレイヤーの1ターンを処理する関数です。
@@ -340,22 +363,22 @@ void player_turn(Player *player, Enemy *enemy, char target)
 
 ```c
 if (player->status & STATUS_BLIND) {
-    printf("敵の構え: [ %c ] (視界が悪い！正確に打ち込め！)\n", target);
+    printf("敵の構え: [ %s ] (視界が悪い！正確に打ち込め！)\n", target);
 } else {
-    printf("敵の構え: [ %c ]\n", target);
+    printf("敵の構え: [ %s ]\n", target);
 }
 ```
 
 `player->status & STATUS_BLIND` は、暗闇状態かどうかを調べています。
 
-暗闇状態でも、練習対象の文字自体はそのまま表示します。
+暗闇状態でも、練習対象の単語自体はそのまま表示します。
 
-大文字、小文字、数字、記号を正確に練習するため、表示文字を別の文字に変える処理は入れていません。
+大文字、小文字、数字、記号を正確に練習するため、表示単語を別の表記に変える処理は入れていません。
 
 ### 入力失敗時
 
 ```c
-if (!read_input(&input)) {
+if (!read_input(input)) {
     printf("➔ 入力が読み取れなかった！ ターンを失った！\n");
     return;
 }
@@ -371,16 +394,16 @@ if (!read_input(&input)) {
 if (is_correct_input(input, target)) {
 ```
 
-入力された文字と出題された文字が完全一致した場合だけ正解です。
+入力された単語と出題された単語が完全一致した場合だけ正解です。
 
-そのため、正解が `A` の場合、`A` は正解ですが `a` は不正解になります。
+そのため、正解が `Fire!` の場合、`Fire!` は正解ですが `fire!` や `Fire` は不正解になります。
 
 ### 毒状態の処理
 
 ```c
 if (player->status & STATUS_POISON) {
     printf("➔ 毒のせいで力が出ない！ 0.5のダメージ！\n");
-    printf("（もう一度同じ文字を的中させろ！）\n");
+    printf("（もう一度同じ単語を的中させろ！）\n");
     player->status &= ~STATUS_POISON;
 } else {
     enemy->hp--;
@@ -479,7 +502,7 @@ void enemy_turn(Player *player, const Enemy *enemy);
 | 経験値 | `Player` に `exp` を追加 |
 | 敵の種類 | `Enemy` の配列を作る |
 | 複数ステージ | `main` の戦闘開始部分をループ化 |
-| 単語入力 | `char target` を文字列に変更 |
+| 単語追加 | `words` 配列に文字列を追加 |
 | 状態異常のターン数 | `Player` に状態ごとの残りターンを追加 |
 | アイテム | `Player` に所持数やインベントリを追加 |
 
@@ -495,9 +518,9 @@ void enemy_turn(Player *player, const Enemy *enemy);
 
    現在は正しく入力できたターンでは反撃されません。練習ゲームとしてはミスの影響が分かりやすい一方、ゲームバランスは今後調整が必要です。
 
-4. 入力はまだ1文字だけ
+4. 入力バッファは固定長
 
-   タイピングRPGとして育てるなら、次の段階で単語入力にするとゲーム性が大きく上がります。
+   現在の入力は最大31文字です。長い文章入力やスペースを含むフレーズを扱う場合は、`fgets` を使った読み取りに変更すると拡張しやすくなります。
 
 ## コンパイル方法
 
