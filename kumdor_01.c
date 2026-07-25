@@ -54,10 +54,6 @@ int main(void) {
         print_battle_status(&player, &enemy);
         player_turn(&player, &enemy, target);
 
-        if (enemy.hp > 0) {
-            enemy_turn(&player, &enemy);
-        }
-
         printf("-----------------------------------------\n");
     }
 
@@ -147,6 +143,7 @@ void player_turn(Player *player, Enemy *enemy, char target) {
         }
     } else {
         printf("➔ ミス！ 手元が狂った！（反撃を受ける！）\n");
+        enemy_turn(player, enemy);
     }
 }
 
