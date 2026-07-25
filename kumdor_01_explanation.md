@@ -2,7 +2,7 @@
 
 この文書は、`kumdor_01.c` の現在のコードを理解するための解説です。
 
-このゲームは、ターミナル上で遊ぶタイピングRPGです。画面に表示されたアルファベットを入力し、正解すると敵にダメージを与えます。敵のHPを0にすれば勝利、プレイヤーのHPが0になると敗北です。
+このゲームは、ターミナル上で遊ぶタイピングRPGです。画面に表示された英字、数字、記号をそのまま入力し、正解すると敵にダメージを与えます。敵のHPを0にすれば勝利、プレイヤーのHPが0になると敗北です。
 
 ## 全体の構成
 
@@ -22,7 +22,6 @@
 ```c
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <time.h>
 ```
 
@@ -32,10 +31,9 @@
 | --- | --- |
 | `stdio.h` | `printf`, `scanf` |
 | `stdlib.h` | `rand`, `srand` |
-| `ctype.h` | `toupper` |
-| `time.h` | `time` |
+| `time.h` | 乱数の初期化に使う `time` |
 
-`toupper` は、小文字入力を大文字として扱うために使っています。たとえば、正解が `A` のとき、プレイヤーが `a` と入力しても正解になります。
+現在の判定は、表示された文字と入力された文字が完全一致した場合だけ正解になります。ブラインドタッチ練習向けに、大文字と小文字は別の文字として扱います。
 
 ## 状態異常のビットフラグ
 
@@ -122,12 +120,12 @@ Enemy enemy = {"クムドールの影", 3, 3, 2};
 ## 関数プロトタイプ宣言
 
 ```c
-void fill_words(char words[], int word_count);
 void print_title(void);
 void apply_opening_status(Player *player);
 void print_battle_status(const Player *player, const Enemy *enemy);
 char choose_target(const char words[], int word_count);
 int read_input(char *input);
+int is_correct_input(char input, char target);
 void player_turn(Player *player, Enemy *enemy, char target);
 void enemy_turn(Player *player, const Enemy *enemy);
 ```
@@ -148,14 +146,13 @@ int main(void) {
 ここで乱数を初期化しています。`rand()` はそのままだと毎回同じ順番の乱数になるため、現在時刻を使って毎回違う結果になりやすくしています。
 
 ```c
-char words[26];
-int word_count = sizeof(words) / sizeof(words[0]);
-fill_words(words, word_count);
+const char words[] = PRACTICE_CHARS;
+int word_count = (int)sizeof(words) - 1;
 ```
 
-`words` はタイピング対象になる文字の配列です。`A` から `Z` までの26文字が入ります。
+`words` はタイピング対象になる文字列です。英大文字、英小文字、数字、記号が入ります。
 
-`word_count` は配列の要素数です。
+`word_count` は出題対象の文字数です。文字列の最後には終端文字 `'\0'` が入るため、`sizeof(words) - 1` にしています。
 
 ```c
 Player player = {"あなた", 10, 10, STATUS_NORMAL};
@@ -221,19 +218,15 @@ if (player.hp > 0) {
 
 敵のHPが0になれば勝利です。プレイヤーのHPが0になれば敗北です。
 
-## fill_words 関数
+## PRACTICE_CHARS 定数
 
 ```c
-void fill_words(char words[], int word_count) {
-    for (int i = 0; i < word_count; i++) {
-        words[i] = 'A' + i;
-    }
-}
+#define PRACTICE_CHARS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789..."
 ```
 
-`words` 配列に `A` から `Z` までを入れる関数です。
+`PRACTICE_CHARS` は出題対象の文字をまとめた定数です。
 
-`'A' + 0` は `A`、`'A' + 1` は `B`、`'A' + 2` は `C` になります。文字は内部的には数値として扱えるため、このような書き方ができます。
+大文字と小文字は別の文字として入っているため、`A` が出たときに `a` と入力しても不正解になります。
 
 ## print_title 関数
 
@@ -349,7 +342,7 @@ void player_turn(Player *player, Enemy *enemy, char target)
 
 ```c
 if (player->status & STATUS_BLIND) {
-    printf("敵の構え: [ %c ] (視界が悪い！大文字で打ち込め！)\n", target + 32);
+    printf("敵の構え: [ %c ] (視界が悪い！正確に打ち込め！)\n", target);
 } else {
     printf("敵の構え: [ %c ]\n", target);
 }
@@ -357,9 +350,9 @@ if (player->status & STATUS_BLIND) {
 
 `player->status & STATUS_BLIND` は、暗闇状態かどうかを調べています。
 
-暗闇状態の場合、正解文字を小文字として表示しています。たとえば、正解が `A` なら画面には `a` と表示されます。
+暗闇状態でも、練習対象の文字自体はそのまま表示します。
 
-現在は `target + 32` で小文字化しています。`A` から `Z` の範囲では動作しますが、今後は `tolower()` を使うとより安全です。
+大文字、小文字、数字、記号を正確に練習するため、表示文字を別の文字に変える処理は入れていません。
 
 ### 入力失敗時
 
@@ -374,17 +367,15 @@ if (!read_input(&input)) {
 
 ここで `return` しているため、それ以降の正解判定や攻撃処理は行われません。
 
-### 小文字入力への対応
+### 入力判定
 
 ```c
-if (toupper((unsigned char)input) == target) {
+if (is_correct_input(input, target)) {
 ```
 
-入力文字を `toupper` で大文字に変換してから、正解文字と比較しています。
+入力された文字と出題された文字が完全一致した場合だけ正解です。
 
-そのため、正解が `A` の場合、`A` でも `a` でも正解になります。
-
-`(unsigned char)input` としているのは、`toupper` に安全な値を渡すためです。C言語では、`char` が負の値を持つ環境があり、そのまま渡すと未定義動作になる可能性があります。
+そのため、正解が `A` の場合、`A` は正解ですが `a` は不正解になります。
 
 ### 毒状態の処理
 
@@ -502,11 +493,7 @@ void enemy_turn(Player *player, const Enemy *enemy);
 
    表示では「攻撃力半減」「0.5ダメージ」と言っていますが、実装上は0ダメージです。将来的にはHPを2倍の単位で管理するか、攻撃力を導入すると自然になります。
 
-2. 暗闇時の小文字化が `target + 32`
-
-   今は `A` から `Z` だけなので動作しますが、Cとしては `tolower()` を使うほうが安全です。
-
-3. 敵の反撃が毎ターン発生する
+2. 敵の反撃が毎ターン発生する
 
    プレイヤーが正解しても敵を倒しきれなければ反撃されます。これはターン制RPGとして自然ですが、ゲームバランスは今後調整が必要です。
 

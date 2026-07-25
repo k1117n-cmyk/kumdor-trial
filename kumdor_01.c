@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <time.h>
 
 // プレイヤーの状態を管理するビットフラグ
 #define STATUS_NORMAL 0x00  // 正常
 #define STATUS_POISON 0x01  // 毒（攻撃力が下がる）
 #define STATUS_BLIND  0x02  // 暗闇（敵の文字が見えにくくなる）
+
+#define PRACTICE_CHARS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{};:'\",.<>/?\\|`~"
 
 typedef struct {
     const char *name;
@@ -22,12 +23,12 @@ typedef struct {
     int attack;
 } Enemy;
 
-void fill_words(char words[], int word_count);
 void print_title(void);
 void apply_opening_status(Player *player);
 void print_battle_status(const Player *player, const Enemy *enemy);
 char choose_target(const char words[], int word_count);
 int read_input(char *input);
+int is_correct_input(char input, char target);
 void player_turn(Player *player, Enemy *enemy, char target);
 void enemy_turn(Player *player, const Enemy *enemy);
 
@@ -35,9 +36,8 @@ int main(void) {
     // 乱数の初期化
     srand((unsigned int)time(NULL));
 
-    char words[26];
-    int word_count = sizeof(words) / sizeof(words[0]);
-    fill_words(words, word_count);
+    const char words[] = PRACTICE_CHARS;
+    int word_count = (int)sizeof(words) - 1;
 
     // ゲームのステータス変数
     Player player = {"あなた", 10, 10, STATUS_NORMAL};
@@ -68,18 +68,11 @@ int main(void) {
     return 0;
 }
 
-void fill_words(char words[], int word_count) {
-    // 'A' から順番に1文字ずつ進めて配列に詰め込む
-    for (int i = 0; i < word_count; i++) {
-        words[i] = 'A' + i;
-    }
-}
-
 void print_title(void) {
     printf("=========================================\n");
     printf("     タイピングRPG ★ クムドールの試練     \n");
     printf("=========================================\n");
-    printf("現れた文字を正確にタイプして、敵を倒せ！\n\n");
+    printf("現れた文字をそのまま正確にタイプして、敵を倒せ！\n\n");
 }
 
 void apply_opening_status(Player *player) {
@@ -113,13 +106,16 @@ int read_input(char *input) {
     return scanf(" %c", input) == 1; // 頭のスペースで改行を読み飛ばすC言語のテクニック
 }
 
+int is_correct_input(char input, char target) {
+    return input == target;
+}
+
 void player_turn(Player *player, Enemy *enemy, char target) {
     char input;
 
     // 暗闇フラグ（ビット演算）のチェック
     if (player->status & STATUS_BLIND) {
-        // 暗闇状態なら、文字がヒント（小文字）になって難しくなる
-        printf("敵の構え: [ %c ] (視界が悪い！大文字で打ち込め！)\n", target + 32);
+        printf("敵の構え: [ %c ] (視界が悪い！正確に打ち込め！)\n", target);
     } else {
         printf("敵の構え: [ %c ]\n", target);
     }
@@ -130,7 +126,7 @@ void player_turn(Player *player, Enemy *enemy, char target) {
     }
 
     // 文字が一致しているか判定
-    if (toupper((unsigned char)input) == target) {
+    if (is_correct_input(input, target)) {
         // 毒フラグ（ビット演算）のチェック
         if (player->status & STATUS_POISON) {
             printf("➔ 毒のせいで力が出ない！ 0.5のダメージ！\n");
