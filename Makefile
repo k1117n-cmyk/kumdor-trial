@@ -1,17 +1,17 @@
 CC := cc
-CFLAGS := -Wall -Wextra -pedantic
+CFLAGS := -Wall -Wextra -pedantic -Iinclude
 TARGET := kumdor_01
-SOURCE := kumdor_01.c
+SOURCES := kumdor_01.c src/game.c src/stages.c
 
 .PHONY: all run clean
 
 all: $(TARGET)
 
-$(TARGET): $(SOURCE)
-	$(CC) $(CFLAGS) $(SOURCE) -o $(TARGET)
+$(TARGET): $(SOURCES) include/game.h
+	$(CC) $(CFLAGS) $(SOURCES) -o $(TARGET)
 
 run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	rm -f $(TARGET) *.o *.out
+	rm -f $(TARGET) *.o src/*.o *.out
