@@ -35,6 +35,8 @@ typedef struct {
 
 typedef struct {
     Enemy enemy;
+    const char *place;
+    const char *story;
     const char *lesson;
     const char *tip;
     const char *const *words;
@@ -42,6 +44,7 @@ typedef struct {
     const char *reward_name;
     int reward_heal;
     int exp_reward;
+    const char *clear_story;
 } Stage;
 
 const Stage *get_stages(int *stage_count);

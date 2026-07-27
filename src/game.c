@@ -6,16 +6,19 @@
 #include <time.h>
 
 static void print_title(void);
+static void print_prologue(void);
 static void apply_opening_status(Player *player);
 static void print_stage_transition(int next_stage_number, int stage_count);
 static void print_stage_intro(int stage_number, int stage_count, const Stage *stage);
 static void print_stage_clear(int stage_number, const Stage *stage, Player *player);
+static void print_ending(const Player *player);
 static void print_battle_start(const Enemy *enemy);
 static void print_battle_status(const Player *player, const Enemy *enemy);
 static void print_score(const Player *player, int stage_count);
 static void gain_exp(Player *player, int exp);
 static int load_game(Player *player, int *start_stage, int stage_count);
 static int save_game(const Player *player, int next_stage, int stage_count);
+static int prompt_next_stage(int next_stage_number, int stage_count);
 static const char *choose_target(const char *const words[], int word_count);
 static int read_input(char input[]);
 static int is_correct_input(const char input[], const char target[]);
@@ -34,6 +37,7 @@ int run_game(void) {
 
     print_title();
     if (!load_game(&player, &start_stage, stage_count)) {
+        print_prologue();
         apply_opening_status(&player);
     }
 
@@ -62,14 +66,16 @@ int run_game(void) {
         if (player.hp > 0 && !quit_requested) {
             print_stage_clear(stage + 1, &stages[stage], &player);
             save_game(&player, stage + 1, stage_count);
+            if (stage + 1 < stage_count && !prompt_next_stage(stage + 2, stage_count)) {
+                quit_requested = 1;
+            }
         }
     }
 
     if (quit_requested) {
         printf("\n【終了】クムドールの試練を中断しました。\n");
     } else if (player.hp > 0) {
-        printf("\n【完全勝利】クムドールの剣がまばゆく輝いた！\n");
-        printf("あなたのタイピングスキルがレベルアップした！\n");
+        print_ending(&player);
     } else {
         printf("\n【敗北】%sは膝をついた……。\n", player.name);
         printf("もう一度挑戦して、クムドールの試練を突破しよう！\n");
@@ -88,14 +94,27 @@ static void print_title(void) {
     printf("現れた課題をそのまま正確にタイプして、敵を倒せ！\n\n");
 }
 
+static void print_prologue(void) {
+    printf("=========================================\n");
+    printf("【プロローグ】\n\n");
+    printf("ポーラ暦405年。銀河で名を知られたキーボード使いのあなたは、\n");
+    printf("退屈を振り払うように、移民惑星ソルフェスへ向かった。\n");
+    printf("だが到着した夜、クムドール王国からの使者が倒れ込み、こう告げる。\n");
+    printf("「クムの森が石になり、王都との通信が途絶えました。どうか来てください」\n");
+    printf("あなたは自動操縦船クム3号に乗り込む。目的地は小さな森林惑星、クムドール。\n");
+    printf("しかし着陸直前、船の計器は意味のない文字列を吐き出し、空から墜ちた。\n");
+    printf("失ったキー、散らばったスパイス、残ったライフはひとつ。\n");
+    printf("それでも、指はまだホームポジションを覚えている。\n\n");
+}
+
 static void apply_opening_status(Player *player) {
     // 敵の先制攻撃！ランダムで状態異常フラグを立てる
     if (rand() % 2 == 0) {
         player->status |= STATUS_POISON;
-        printf("[警告] 敵の罠にかかり【毒】状態になった！（次の正解で毒を解除）\n");
+        printf("[警告] 墜落跡に残った毒霧を吸い込み【毒】状態になった！（次の正解で毒を解除）\n");
     } else {
         player->status |= STATUS_BLIND;
-        printf("[警告] 敵の魔霧により【暗闇】状態になった！（文字が化ける）\n");
+        printf("[警告] 残骸から立ち上がった魔霧で【暗闇】状態になった！（視界が悪くなる）\n");
     }
 }
 
@@ -108,6 +127,8 @@ static void print_stage_transition(int next_stage_number, int stage_count) {
 static void print_stage_intro(int stage_number, int stage_count, const Stage *stage) {
     printf("\n=========================================\n");
     printf("【第%d/%dステージ】\n", stage_number, stage_count);
+    printf("場所    : %s\n", stage->place);
+    printf("%s\n", stage->story);
     printf("練習内容: %s\n", stage->lesson);
     printf("指使い  : %s\n", stage->tip);
     printf("敵      : %s\n", stage->enemy.name);
@@ -133,7 +154,18 @@ static void print_stage_clear(int stage_number, const Stage *stage, Player *play
                player->max_hp);
     }
 
+    printf("%s\n", stage->clear_story);
     printf("=========================================\n");
+}
+
+static void print_ending(const Player *player) {
+    printf("\n【完全勝利】\n");
+    printf("%sが最後の課題を打ち抜いた瞬間、クムドールの剣がまばゆく輝いた！\n",
+           player->name);
+    printf("石化していたクムの森は緑を取り戻し、王都の通信塔にも光が戻る。\n");
+    printf("女王マルクァ・ランドは、あなたを王国の救い手として迎えた。\n");
+    printf("けれど本当の報酬は、視線を落とさず打ち切ったその両手に残っている。\n");
+    printf("あなたのタイピングスキルがレベルアップした！\n");
 }
 
 static void print_battle_start(const Enemy *enemy) {
@@ -299,6 +331,40 @@ static int save_game(const Player *player, int next_stage, int stage_count) {
     }
 
     return 1;
+}
+
+static int prompt_next_stage(int next_stage_number, int stage_count) {
+    char input[INPUT_BUFFER_SIZE];
+
+    while (1) {
+        printf("\n次の試練へ進みますか？ 第%d/%dステージ\n", next_stage_number, stage_count);
+        printf("Enter: 進む / q: ここで終了（セーブ済み）: ");
+
+        if (fgets(input, INPUT_BUFFER_SIZE, stdin) == NULL) {
+            printf("\n入力が読み取れなかったため、ここで終了します。第%dステージから再開できます。\n",
+                   next_stage_number);
+            return 0;
+        }
+
+        input[strcspn(input, "\n")] = '\0';
+
+        if (input[0] == '\0' ||
+            strcmp(input, "next") == 0 ||
+            strcmp(input, "NEXT") == 0) {
+            return 1;
+        }
+
+        if (strcmp(input, "q") == 0 ||
+            strcmp(input, "Q") == 0 ||
+            strcmp(input, SAVE_COMMAND) == 0 ||
+            strcmp(input, QUIT_COMMAND) == 0 ||
+            strcmp(input, SAVE_QUIT_COMMAND) == 0) {
+            printf("第%dステージから再開できます。\n", next_stage_number);
+            return 0;
+        }
+
+        printf("入力が不明です。Enterかqを入力してください。\n");
+    }
 }
 
 static const char *choose_target(const char *const words[], int word_count) {
