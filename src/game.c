@@ -5,6 +5,15 @@
 #include <string.h>
 #include <time.h>
 
+#define COLOR_RESET   "\033[0m"
+#define COLOR_RED     "\033[95m"
+#define COLOR_GREEN   "\033[32m"
+#define COLOR_YELLOW  "\033[33m"
+#define COLOR_BLUE    "\033[34m"
+#define COLOR_MAGENTA "\033[35m"
+#define COLOR_CYAN    "\033[36m"
+#define COLOR_BOLD    "\033[1m"
+
 static void print_title(void);
 static void print_prologue(void);
 static void apply_opening_status(Player *player);
@@ -25,6 +34,8 @@ static int read_input(char input[]);
 static int is_correct_input(const char input[], const char target[]);
 static int player_turn(Player *player, Enemy *enemy, const char target[], int current_stage, int stage_count);
 static void enemy_turn(Player *player, const Enemy *enemy);
+static const char *color(const char *code);
+static const char *hp_color(const Player *player);
 
 int run_game(void) {
     // 乱数の初期化
@@ -74,11 +85,16 @@ int run_game(void) {
     }
 
     if (quit_requested) {
-        printf("\n【終了】クムドールの試練を中断しました。\n");
+        printf("\n%s【終了】%sクムドールの試練を中断しました。\n",
+               color(COLOR_BLUE),
+               color(COLOR_RESET));
     } else if (player.hp > 0) {
         print_ending(&player);
     } else {
-        printf("\n【敗北】%sは膝をついた……。\n", player.name);
+        printf("\n%s【敗北】%s%sは膝をついた……。\n",
+               color(COLOR_RED),
+               color(COLOR_RESET),
+               player.name);
         printf("もう一度挑戦して、クムドールの試練を突破しよう！\n");
     }
 
@@ -88,16 +104,16 @@ int run_game(void) {
 }
 
 static void print_title(void) {
-    printf("=========================================\n");
+    printf("%s%s=========================================\n", color(COLOR_BOLD), color(COLOR_CYAN));
     printf("     タイピングRPG ★ クムドールの試練     \n");
     printf("                  %s                  \n", GAME_VERSION);
-    printf("=========================================\n");
+    printf("=========================================%s\n", color(COLOR_RESET));
     printf("現れた課題をそのまま正確にタイプして、敵を倒せ！\n\n");
 }
 
 static void print_prologue(void) {
-    printf("=========================================\n");
-    printf("【プロローグ】\n\n");
+    printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("%s【プロローグ】%s\n\n", color(COLOR_YELLOW), color(COLOR_RESET));
     printf("ポーラ暦405年。銀河で名を知られたキーボード使いのあなたは、\n");
     printf("退屈を振り払うように、移民惑星ソルフェスへ向かった。\n");
     printf("だが到着した夜、クムドール王国からの使者が倒れ込み、こう告げる。\n");
@@ -112,34 +128,46 @@ static void apply_opening_status(Player *player) {
     // 敵の先制攻撃！ランダムで状態異常フラグを立てる
     if (rand() % 2 == 0) {
         player->status |= STATUS_POISON;
-        printf("[警告] 墜落跡に残った毒霧を吸い込み【毒】状態になった！（次の正解で毒を解除）\n");
+        printf("%s[警告]%s 墜落跡に残った毒霧を吸い込み【毒】状態になった！（次の正解で毒を解除）\n",
+               color(COLOR_RED),
+               color(COLOR_RESET));
     } else {
         player->status |= STATUS_BLIND;
-        printf("[警告] 残骸から立ち上がった魔霧で【暗闇】状態になった！（視界が悪くなる）\n");
+        printf("%s[警告]%s 残骸から立ち上がった魔霧で【暗闇】状態になった！（視界が悪くなる）\n",
+               color(COLOR_RED),
+               color(COLOR_RESET));
     }
 }
 
 static void print_stage_transition(int next_stage_number, int stage_count) {
-    printf("\n-----------------------------------------\n");
-    printf("次の試練へ進む: 第%d/%dステージ\n", next_stage_number, stage_count);
-    printf("-----------------------------------------\n");
+    printf("\n%s-----------------------------------------%s\n", color(COLOR_BLUE), color(COLOR_RESET));
+    printf("%s次の試練へ進む: 第%d/%dステージ%s\n",
+           color(COLOR_BLUE),
+           next_stage_number,
+           stage_count,
+           color(COLOR_RESET));
+    printf("%s-----------------------------------------%s\n", color(COLOR_BLUE), color(COLOR_RESET));
 }
 
 static void print_stage_intro(int stage_number, int stage_count, const Stage *stage) {
-    printf("\n=========================================\n");
-    printf("【第%d/%dステージ】\n", stage_number, stage_count);
+    printf("\n%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("%s【第%d/%dステージ】%s\n",
+           color(COLOR_YELLOW),
+           stage_number,
+           stage_count,
+           color(COLOR_RESET));
     printf("場所    : %s\n", stage->place);
     printf("%s\n", stage->story);
     printf("練習内容: %s\n", stage->lesson);
     printf("指使い  : %s\n", stage->tip);
-    printf("敵      : %s\n", stage->enemy.name);
-    printf("=========================================\n");
+    printf("敵      : %s%s%s\n", color(COLOR_RED), stage->enemy.name, color(COLOR_RESET));
+    printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
 }
 
 static void print_stage_clear(int stage_number, const Stage *stage, Player *player) {
-    printf("\n=========================================\n");
-    printf("【ステージ%d突破】\n", stage_number);
-    printf("%sを倒した！\n", stage->enemy.name);
+    printf("\n%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("%s【ステージ%d突破】%s\n", color(COLOR_GREEN), stage_number, color(COLOR_RESET));
+    printf("%s%sを倒した！%s\n", color(COLOR_GREEN), stage->enemy.name, color(COLOR_RESET));
     gain_exp(player, stage->exp_reward);
 
     if (stage->reward_heal > 0 && player->hp < player->max_hp) {
@@ -148,19 +176,21 @@ static void print_stage_clear(int stage_number, const Stage *stage, Player *play
             player->hp = player->max_hp;
         }
 
-        printf("%sでHPが%d回復した！ (あなたのHP: %d/%d)\n",
+        printf("%s%sでHPが%d回復した！%s (あなたのHP: %d/%d)\n",
+               color(COLOR_GREEN),
                stage->reward_name,
                stage->reward_heal,
+               color(COLOR_RESET),
                player->hp,
                player->max_hp);
     }
 
     printf("%s\n", stage->clear_story);
-    printf("=========================================\n");
+    printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
 }
 
 static void print_ending(const Player *player) {
-    printf("\n【完全勝利】\n");
+    printf("\n%s【完全勝利】%s\n", color(COLOR_GREEN), color(COLOR_RESET));
     printf("%sが最後の課題を打ち抜いた瞬間、クムドールの剣がまばゆく輝いた！\n",
            player->name);
     printf("石化していたクムの森は緑を取り戻し、王都の通信塔にも光が戻る。\n");
@@ -170,21 +200,34 @@ static void print_ending(const Player *player) {
 }
 
 static void print_battle_start(const Enemy *enemy) {
-    printf("\n*************** BATTLE START ***************\n");
-    printf("%sが立ちはだかった！\n", enemy->name);
-    printf("********************************************\n\n");
+    printf("\n%s*************** BATTLE START ***************%s\n",
+           color(COLOR_RED),
+           color(COLOR_RESET));
+    printf("%s%sが立ちはだかった！%s\n",
+           color(COLOR_RED),
+           enemy->name,
+           color(COLOR_RESET));
+    printf("%s********************************************%s\n\n",
+           color(COLOR_RED),
+           color(COLOR_RESET));
 }
 
 static void print_battle_status(const Player *player, const Enemy *enemy) {
-    printf("%s Lv:%d EXP:%d/%d HP: %d/%d 状態:%s | %s HP: %d/%d\n",
+    printf("%s Lv:%d EXP:%d/%d HP: %s%d/%d%s 状態:%s%s%s | %s%s%s HP: %d/%d\n",
            player->name,
            player->level,
            player->exp,
            EXP_TO_LEVEL_UP,
+           hp_color(player),
            player->hp,
            player->max_hp,
+           color(COLOR_RESET),
+           player->status == STATUS_NORMAL ? color(COLOR_GREEN) : color(COLOR_YELLOW),
            status_name(player->status),
+           color(COLOR_RESET),
+           color(COLOR_RED),
            enemy->name,
+           color(COLOR_RESET),
            enemy->hp,
            enemy->max_hp);
 }
@@ -197,8 +240,8 @@ static void print_score(const Player *player, int stage_count) {
         accuracy = ((double)player->correct_count / (double)total_inputs) * 100.0;
     }
 
-    printf("\n=========================================\n");
-    printf("【スコア】\n");
+    printf("\n%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("%s【スコア】%s\n", color(COLOR_MAGENTA), color(COLOR_RESET));
     printf("到達ステージ: %d/%d\n", player->reached_stage, stage_count);
     printf("レベル      : %d\n", player->level);
     printf("経験値      : %d/%d\n", player->exp, EXP_TO_LEVEL_UP);
@@ -208,16 +251,16 @@ static void print_score(const Player *player, int stage_count) {
     printf("命中率      : %.1f%%\n", accuracy);
 
     if (accuracy >= 95.0 && player->reached_stage == stage_count && player->hp > 0) {
-        printf("評価        : 銀河級のキーボード使い\n");
+        printf("評価        : %s銀河級のキーボード使い%s\n", color(COLOR_GREEN), color(COLOR_RESET));
     } else if (accuracy >= 80.0) {
-        printf("評価        : 安定した剣さばき\n");
+        printf("評価        : %s安定した剣さばき%s\n", color(COLOR_GREEN), color(COLOR_RESET));
     } else if (accuracy >= 60.0) {
-        printf("評価        : まずは正確さを固めよう\n");
+        printf("評価        : %sまずは正確さを固めよう%s\n", color(COLOR_YELLOW), color(COLOR_RESET));
     } else {
-        printf("評価        : ホームポジションから再挑戦\n");
+        printf("評価        : %sホームポジションから再挑戦%s\n", color(COLOR_RED), color(COLOR_RESET));
     }
 
-    printf("=========================================\n");
+    printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
 }
 
 static const char *status_name(unsigned char status) {
@@ -238,7 +281,7 @@ static const char *status_name(unsigned char status) {
 
 static void gain_exp(Player *player, int exp) {
     player->exp += exp;
-    printf("EXPを%d獲得した！\n", exp);
+    printf("%sEXPを%d獲得した！%s\n", color(COLOR_MAGENTA), exp, color(COLOR_RESET));
 
     while (player->exp >= EXP_TO_LEVEL_UP) {
         player->exp -= EXP_TO_LEVEL_UP;
@@ -246,9 +289,11 @@ static void gain_exp(Player *player, int exp) {
         player->max_hp += 2;
         player->hp = player->max_hp;
 
-        printf("【レベルアップ】Lv:%d 最大HPが%dになった！ HP全回復！\n",
+        printf("%s【レベルアップ】Lv:%d 最大HPが%dになった！ HP全回復！%s\n",
+               color(COLOR_GREEN),
                player->level,
-               player->max_hp);
+               player->max_hp,
+               color(COLOR_RESET));
     }
 
     printf("現在のEXP: %d/%d\n", player->exp, EXP_TO_LEVEL_UP);
@@ -323,7 +368,9 @@ static int save_game(const Player *player, int next_stage, int stage_count) {
     FILE *file = fopen(SAVE_FILE, "w");
 
     if (file == NULL) {
-        printf("[警告] セーブデータを書き込めませんでした。\n");
+        printf("%s[警告]%s セーブデータを書き込めませんでした。\n",
+               color(COLOR_RED),
+               color(COLOR_RESET));
         return 0;
     }
 
@@ -343,9 +390,14 @@ static int save_game(const Player *player, int next_stage, int stage_count) {
     fclose(file);
 
     if (next_stage < stage_count) {
-        printf("[セーブ] 第%dステージから再開できます。\n", next_stage + 1);
+        printf("%s[セーブ]%s 第%dステージから再開できます。\n",
+               color(COLOR_BLUE),
+               color(COLOR_RESET),
+               next_stage + 1);
     } else {
-        printf("[セーブ] 完全勝利の記録を保存しました。\n");
+        printf("%s[セーブ]%s 完全勝利の記録を保存しました。\n",
+               color(COLOR_BLUE),
+               color(COLOR_RESET));
     }
 
     return 1;
@@ -355,7 +407,11 @@ static int prompt_next_stage(int next_stage_number, int stage_count) {
     char input[INPUT_BUFFER_SIZE];
 
     while (1) {
-        printf("\n次の試練へ進みますか？ 第%d/%dステージ\n", next_stage_number, stage_count);
+        printf("\n%s次の試練へ進みますか？ 第%d/%dステージ%s\n",
+               color(COLOR_YELLOW),
+               next_stage_number,
+               stage_count,
+               color(COLOR_RESET));
         printf("Enter: 進む / q: ここで終了（セーブ済み）: ");
 
         if (fgets(input, INPUT_BUFFER_SIZE, stdin) == NULL) {
@@ -409,13 +465,20 @@ static int player_turn(Player *player, Enemy *enemy, const char target[], int cu
 
     // 暗闇フラグ（ビット演算）のチェック
     if (player->status & STATUS_BLIND) {
-        printf("敵の構え: [ %s ] (視界が悪い！正確に打ち込め！)\n", target);
+        printf("敵の構え: [ %s%s%s ] %s(視界が悪い！正確に打ち込め！)%s\n",
+               color(COLOR_YELLOW),
+               target,
+               color(COLOR_RESET),
+               color(COLOR_RED),
+               color(COLOR_RESET));
     } else {
-        printf("敵の構え: [ %s ]\n", target);
+        printf("敵の構え: [ %s%s%s ]\n", color(COLOR_YELLOW), target, color(COLOR_RESET));
     }
 
     if (!read_input(input)) {
-        printf("➔ 入力が読み取れなかった！ 反撃を受ける！\n");
+        printf("%s➔ 入力が読み取れなかった！ 反撃を受ける！%s\n",
+               color(COLOR_RED),
+               color(COLOR_RESET));
         player->input_error_count++;
         enemy_turn(player, enemy);
         return 1;
@@ -423,18 +486,20 @@ static int player_turn(Player *player, Enemy *enemy, const char target[], int cu
 
     if (strcmp(input, SAVE_COMMAND) == 0) {
         save_game(player, current_stage, stage_count);
-        printf("➔ セーブしました。現在のステージの先頭から再開できます。\n");
+        printf("%s➔ セーブしました。現在のステージの先頭から再開できます。%s\n",
+               color(COLOR_BLUE),
+               color(COLOR_RESET));
         return 1;
     }
 
     if (strcmp(input, QUIT_COMMAND) == 0) {
-        printf("➔ 保存せずに終了します。\n");
+        printf("%s➔ 保存せずに終了します。%s\n", color(COLOR_BLUE), color(COLOR_RESET));
         return 0;
     }
 
     if (strcmp(input, SAVE_QUIT_COMMAND) == 0) {
         save_game(player, current_stage, stage_count);
-        printf("➔ セーブして終了します。\n");
+        printf("%s➔ セーブして終了します。%s\n", color(COLOR_BLUE), color(COLOR_RESET));
         return 0;
     }
 
@@ -444,16 +509,23 @@ static int player_turn(Player *player, Enemy *enemy, const char target[], int cu
 
         // 毒フラグ（ビット演算）のチェック
         if (player->status & STATUS_POISON) {
-            printf("➔ 毒のせいで攻撃が届かない！\n");
-            printf("（毒は消えた。もう一度課題を的中させろ！）\n");
+            printf("%s➔ 毒のせいで攻撃が届かない！%s\n", color(COLOR_YELLOW), color(COLOR_RESET));
+            printf("%s（毒は消えた。もう一度課題を的中させろ！）%s\n",
+                   color(COLOR_GREEN),
+                   color(COLOR_RESET));
             player->status &= ~STATUS_POISON; // 毒を解除
         } else {
             enemy->hp--;
-            printf("➔ 見事なタイピング！ 剣が炸裂した！ (敵の残りHP: %d)\n", enemy->hp);
+            printf("%s➔ 見事なタイピング！ 剣が炸裂した！%s (敵の残りHP: %d)\n",
+                   color(COLOR_GREEN),
+                   color(COLOR_RESET),
+                   enemy->hp);
         }
     } else {
         player->miss_count++;
-        printf("➔ ミス！ 手元が狂った！（反撃を受ける！）\n");
+        printf("%s➔ ミス！ 手元が狂った！（反撃を受ける！）%s\n",
+               color(COLOR_RED),
+               color(COLOR_RESET));
         enemy_turn(player, enemy);
     }
 
@@ -467,8 +539,26 @@ static void enemy_turn(Player *player, const Enemy *enemy) {
         player->hp = 0;
     }
 
-    printf("➔ %sの反撃！ %dダメージを受けた！ (あなたの残りHP: %d)\n",
+    printf("%s➔ %sの反撃！ %dダメージを受けた！%s (あなたの残りHP: %d)\n",
+           color(COLOR_RED),
            enemy->name,
            enemy->attack,
+           color(COLOR_RESET),
            player->hp);
+}
+
+static const char *color(const char *code) {
+    return getenv("NO_COLOR") == NULL ? code : "";
+}
+
+static const char *hp_color(const Player *player) {
+    if (player->hp * 3 <= player->max_hp) {
+        return color(COLOR_RED);
+    }
+
+    if (player->hp * 2 <= player->max_hp) {
+        return color(COLOR_YELLOW);
+    }
+
+    return color(COLOR_GREEN);
 }
