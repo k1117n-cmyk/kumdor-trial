@@ -1,27 +1,26 @@
 #include "game.h"
 
 static const char *const stage1_words[] = {
-    "f",
-    "j",
     "fj",
     "jf",
     "ff",
     "jj",
+    "fff",
+    "jjj",
     "fjjf",
     "jffj",
+    "ffjj",
+    "jjff",
     "f j",
     "j f",
     "fj fj",
-    "jf jf"
+    "jf jf",
+    "ff jj",
+    "fj jf",
+    "jff fj"
 };
 
 static const char *const stage2_words[] = {
-    "a",
-    "s",
-    "d",
-    "f",
-    "as",
-    "df",
     "sad",
     "fad",
     "asdf",
@@ -29,16 +28,17 @@ static const char *const stage2_words[] = {
     "dad",
     "sass",
     "adds",
-    "as df"
+    "as df",
+    "sad fad",
+    "add sad",
+    "sass dad",
+    "asfd",
+    "dfas",
+    "fads",
+    "sadaf"
 };
 
 static const char *const stage3_words[] = {
-    "j",
-    "k",
-    "l",
-    ";",
-    "jk",
-    "kl",
     "j;",
     "lj",
     "jkl;",
@@ -47,16 +47,17 @@ static const char *const stage3_words[] = {
     "fall",
     "flak",
     "ask",
-    "j k"
+    "j k",
+    "jkl; j",
+    "fall ask",
+    "all;all",
+    "j;k;l",
+    "flask",
+    "j;kj",
+    ";ljk"
 };
 
 static const char *const stage4_words[] = {
-    "r",
-    "t",
-    "y",
-    "u",
-    "rt",
-    "yu",
     "fr",
     "ju",
     "rty",
@@ -64,43 +65,65 @@ static const char *const stage4_words[] = {
     "try",
     "turf",
     "trust",
-    "fury"
+    "fury",
+    "truth",
+    "retry",
+    "rusty",
+    "try turf",
+    "fury rut",
+    "rtyu fr",
+    "trusty"
 };
 
 static const char *const stage5_words[] = {
-    "q",
-    "w",
-    "e",
-    "i",
-    "o",
-    "p",
-    "we",
-    "io",
     "qwe",
     "iop",
     "quiet",
     "power",
     "paper",
     "equip",
-    "we io"
+    "we io",
+    "quote",
+    "upper",
+    "equip power",
+    "quiet poet",
+    "qwerty",
+    "pipe",
+    "pop quiz"
 };
 
 static const char *const stage6_words[] = {
-    "g",
-    "h",
-    "v",
-    "b",
-    "n",
-    "m",
-    "gh",
-    "vb",
-    "nm",
     "bgn",
+    "gbn",
+    "hjm",
+    "vbn",
+    "nmh",
+    "ghvb",
+    "bnmg",
+    "hgbn",
     "human",
     "moving",
     "gaming",
     "humble",
-    "gh nm"
+    "magma",
+    "begin",
+    "hinge",
+    "haven",
+    "venom",
+    "minimum",
+    "gh nm",
+    "mvn",
+    "bnhg",
+    "ghvb nm",
+    "vbn gh",
+    "magma hub",
+    "moving hum",
+    "gaming hub",
+    "human vim",
+    "gnb hmv",
+    "humble moving",
+    "begin moving",
+    "venom human"
 };
 
 static const char *const stage7_words[] = {
@@ -110,77 +133,116 @@ static const char *const stage7_words[] = {
     ",",
     ".",
     "/",
+    "?",
     "zxc",
     "cxz",
     ",.",
     "./",
     "z/c",
     "m,./",
-    "?",
     "x.z",
-    "c,/"
+    "c,/",
+    "z.x,c/",
+    "x/c.z",
+    "c,z.x",
+    "mix.z",
+    "quiz?",
+    "cave/z",
+    "x, z.",
+    "zxc?/."
 };
 
 static const char *const stage8_words[] = {
-    "asdf",
-    "jkl;",
     "FJ",
     "AsDf",
     "SWORD",
     "Crystal",
+    "KeyMap",
+    "ShiftKey",
     "Lv10",
     "HP-2",
     "Fire!",
     "Guard?",
     "Save:1",
     "Stage-8",
-    "Type OK"
+    "Type OK",
+    "Run Fast",
+    "Magic:ON",
+    "No_Miss",
+    "Kum-Dor",
+    "A1b2C3",
+    "Sword+1",
+    "Gate-Open",
+    "Code:405",
+    "Map_Q3",
+    "Run+Jump",
+    "HP=Full",
+    "Shift?OK",
+    "Book#8",
+    "Alert!",
+    "Queen_1",
+    "Type-Ready"
 };
 
 static const char *const stage9_words[] = {
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "0",
-    "123",
-    "890",
-    "135",
-    "246",
-    "9090",
-    "10 10",
-    "2026"
+    "405-10",
+    "7/27",
+    "HP=014",
+    "Lv3+5",
+    "100%",
+    "1,024",
+    "3.141",
+    "9:00",
+    "#2026",
+    "ID-405",
+    "20/20?",
+    "405:027",
+    "90%-10",
+    "1/2=0.5",
+    "X9-027",
+    "No.405",
+    "7,270",
+    "10:20/30",
+    "#09-Stage",
+    "2026/07/27",
+    "HP100% Lv9",
+    "ID:405-2026",
+    "9090-XY",
+    "10 10%",
+    "2026#07",
+    "405/10:20",
+    "No.9-HP4",
+    "7:27 PM"
 };
 
 static const char *const stage10_words[] = {
-    "!",
-    "@",
-    "#",
-    "$",
-    "%",
-    "^",
-    "&",
-    "*",
-    "(",
-    ")",
-    "!?",
-    "@@",
-    "#1",
-    "(ok)",
+    "!?OK",
+    "@@Gate",
+    "#1Boss",
+    "(OK?)",
     "RPG!",
     "Kumdor?",
     "Lv+1",
-    "HP=10"
+    "HP=10",
+    "Final!",
+    "Save?No",
+    "Shift+/",
+    "QWERTY!",
+    "KUM-405",
+    "Type:OK!",
+    "Sword#10",
+    "(Stage10)",
+    "No_Miss!",
+    "A1! b2?",
+    "Kumdor_01",
+    "HP=10/10",
+    "Lv+1 OK",
+    "Final-Boss!"
 };
 
 static const Stage stages[] = {
     {
-        {"クムドールの影", 3, 3, 1},
+        {"クムドールの影", 4, 4, 1},
         "アズドフ村の墜落跡",
         "船の残骸から這い出すと、村人たちは遠巻きにこちらを見ていた。抜け落ちたキーを探す前に、黒い影が足元から立ち上がる。",
         "ホームポジション: f / j / スペース",
@@ -193,7 +255,7 @@ static const Stage stages[] = {
         "影がほどけ、村長は北へ続く道を指した。墜落で散らばったスパイスの一部も戻り、村人たちの疑いは少しだけ薄れる。まずは左手のキーを取り戻さなければならない。"
     },
     {
-        {"左手の番人", 4, 4, 2},
+        {"左手の番人", 5, 5, 2},
         "アズドフ東の石畳",
         "石化したクムの木が道をふさぎ、古い門柱だけがかろうじて残っている。左手の番人が、通行料の代わりに正確な打鍵を求めた。",
         "左手ホーム段: a / s / d / f",
@@ -206,7 +268,7 @@ static const Stage stages[] = {
         "門柱のくぼみからa、s、dの感覚が戻った。石畳に刻まれていた古い案内文字が浮かび上がり、ジュクルン村への近道を示す。東へ向かう足取りが少し軽くなる。"
     },
     {
-        {"右手の番人", 4, 4, 2},
+        {"右手の番人", 5, 5, 2},
         "ジュクルン村の鐘楼",
         "村の鐘は鳴らない。通信塔から落ちた金属片が鐘楼に刺さり、右手の番人がその下で目を光らせている。",
         "右手ホーム段: j / k / l / ;",
@@ -219,7 +281,7 @@ static const Stage stages[] = {
         "鐘楼が低く鳴り、j、k、l、;の列が指先に戻った。止まっていた村の掲示板にも通信塔の断片的な警告が流れ始める。村人は湖底へ抜ける古い道を教えてくれた。"
     },
     {
-        {"湖底の影", 5, 5, 2},
+        {"湖底の影", 6, 6, 2},
         "ミルファ湖の沈んだ桟橋",
         "湖面は凍っていないのに、底だけが青白く固まっている。沈んだ桟橋の影から、上段へ伸びる指を狙うものが現れた。",
         "人差し指の上段: r / t / y / u",
@@ -232,7 +294,7 @@ static const Stage stages[] = {
         "湖底に細い水路が開き、王都の方角へ流れが戻った。水に沈んだ桟橋の下から、クム3号の航行ログも見つかる。濁った水の奥でクムの実がひとつ光っている。"
     },
     {
-        {"上段の魔術師", 5, 5, 2},
+        {"上段の魔術師", 6, 6, 3},
         "クムの森の入口",
         "森の木々は灰色に固まり、葉の代わりに文字の欠片を落としている。上段の魔術師は枝先から課題をばらまいた。",
         "上段の広がり: q / w / e / i / o / p",
@@ -245,7 +307,7 @@ static const Stage stages[] = {
         "石の枝に小さな緑が戻った。落ちていた文字の欠片は、誰かが通信塔から呪文を送っている証拠だった。森の奥から、王都の通信塔が発するかすかな断続音が聞こえる。"
     },
     {
-        {"溶岩の番人", 6, 6, 3},
+        {"溶岩の番人", 7, 7, 3},
         "ズロワノフ通路跡",
         "森を抜けると、地面の裂け目に赤い光が走っていた。かつて星間航路を支えた通路跡で、溶岩の番人が中央列を守っている。",
         "中央から下段: g / h / v / b / n / m",
@@ -258,11 +320,11 @@ static const Stage stages[] = {
         "裂け目の熱が静まり、失われた推進装置の記録が浮かび上がった。クム3号は着陸直前に外部から入力を上書きされている。墜落は事故ではなかった。"
     },
     {
-        {"水晶洞の幻", 6, 6, 3},
+        {"水晶洞の幻", 7, 7, 3},
         "ケムリ苔の水晶洞",
         "熱病を鎮めるケムリ苔は、水晶の中に閉じ込められていた。洞窟の幻は下段と記号の揺さぶりで集中を奪いにくる。",
         "下段と記号: z / x / c / , / . / slash / ?",
-        "下段は手が沈みやすいので、打ったあとホームへ戻す。",
+        "下段と記号を続けて打っても、打ったあとホームへ戻す。",
         stage7_words,
         (int)(sizeof(stage7_words) / sizeof(stage7_words[0])),
         "着色タラコ",
@@ -271,7 +333,7 @@ static const Stage stages[] = {
         "水晶が砕け、ケムリ苔が息を吹き返した。洞窟の奥では、薬を待つソルフェスへの発送箱が止まったまま並んでいる。ソルフェスへ送る薬も、王都を救う手がかりも手に入った。"
     },
     {
-        {"古文書の魔術師", 7, 7, 3},
+        {"古文書の魔術師", 8, 8, 3},
         "王立図書庫の地下",
         "王都クミエルの地下には、古いキーボード術の記録が眠っていた。古文書の魔術師は大文字と記号で封印を重ねる。",
         "総合練習: 大文字・小文字・記号",
@@ -284,11 +346,11 @@ static const Stage stages[] = {
         "封印の一枚が剥がれ、古文書はクムドールの剣が文字を正すための道具だったと示した。石化の中心は王城ではない。通信塔の頂上に、最後の入力源がある。"
     },
     {
-        {"数字の壁", 7, 7, 3},
+        {"数字の壁", 9, 9, 4},
         "クミエル通信塔",
         "塔の壁面には、墜落直前に見た数字列が焼き付いていた。数字の壁は、入力順をひとつでも誤れば階段を消してしまう。",
-        "数字キー: 1から0",
-        "ホームポジションを見失わない範囲で、指を数字段へ伸ばす。",
+        "数字キーと記号: 数字列 / - / slash / % / :",
+        "数字段を打ったあとホームへ戻し、記号との切り替えで焦らない。",
         stage9_words,
         (int)(sizeof(stage9_words) / sizeof(stage9_words[0])),
         "健康ドリンク",
@@ -297,11 +359,11 @@ static const Stage stages[] = {
         "数字列が整列し、塔の上層へ続く扉が開いた。墜落時に乱れた計器の数字も、正しい座標へ戻っていく。そこにはクムドールの剣を封じた最後の試練が待っている。"
     },
     {
-        {"クムドールの試練", 8, 8, 3},
+        {"クムドールの試練", 10, 10, 4},
         "通信塔最上階",
         "塔の最上階で、抜け落ちたすべてのキーが剣の形に並ぶ。クムドールの試練は、これまで覚えたすべての打鍵を求めてきた。",
         "最終練習: Shift記号と混合課題",
-        "小指でShiftを押しながら、反対側の指で記号を打つ。",
+        "Shift、大文字、数字、記号、スペースを正確に切り替える。",
         stage10_words,
         (int)(sizeof(stage10_words) / sizeof(stage10_words[0])),
         "立喰いソバ",
