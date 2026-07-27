@@ -7,7 +7,7 @@
 
 #define INPUT_BUFFER_SIZE 64
 #define EXP_TO_LEVEL_UP 10
-#define GAME_VERSION "v0.1.0"
+#define GAME_VERSION "v0.2.0"
 #define SAVE_FILE "kumdor_save.txt"
 #define SAVE_COMMAND ":save"
 #define QUIT_COMMAND ":quit"
