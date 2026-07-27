@@ -5,6 +5,15 @@
 #include <string.h>
 #include <time.h>
 
+#ifdef __APPLE__
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+extern int play_bgm_loop(const char *path, float volume);
+#endif
+
 #define COLOR_RESET   "\033[0m"
 #define COLOR_RED     "\033[95m"
 #define COLOR_GREEN   "\033[32m"
@@ -34,12 +43,20 @@ static int read_input(char input[]);
 static int is_correct_input(const char input[], const char target[]);
 static int player_turn(Player *player, Enemy *enemy, const char target[], int current_stage, int stage_count);
 static void enemy_turn(Player *player, const Enemy *enemy);
+static void start_stage_bgm(int stage_number);
+static void stop_bgm(void);
+static void cleanup_audio(void);
 static const char *color(const char *code);
 static const char *hp_color(const Player *player);
+
+#ifdef __APPLE__
+static pid_t bgm_pid = -1;
+#endif
 
 int run_game(void) {
     // 乱数の初期化
     srand((unsigned int)time(NULL));
+    atexit(cleanup_audio);
 
     Player player = {"あなた", 10, 10, STATUS_NORMAL, 0, 0, 0, 0, 1, 0};
     int stage_count = 0;
@@ -60,6 +77,7 @@ int run_game(void) {
         if (stage > start_stage) {
             print_stage_transition(stage + 1, stage_count);
         }
+        start_stage_bgm(stage + 1);
         print_stage_intro(stage + 1, stage_count, &stages[stage]);
         print_battle_start(&enemy);
 
@@ -77,12 +95,15 @@ int run_game(void) {
 
         if (player.hp > 0 && !quit_requested) {
             print_stage_clear(stage + 1, &stages[stage], &player);
+            stop_bgm();
             save_game(&player, stage + 1, stage_count);
             if (stage + 1 < stage_count && !prompt_next_stage(stage + 2, stage_count)) {
                 quit_requested = 1;
             }
         }
     }
+
+    stop_bgm();
 
     if (quit_requested) {
         printf("\n%s【終了】%sクムドールの試練を中断しました。\n",
@@ -545,6 +566,64 @@ static void enemy_turn(Player *player, const Enemy *enemy) {
            enemy->attack,
            color(COLOR_RESET),
            player->hp);
+}
+
+static void start_stage_bgm(int stage_number) {
+#ifdef __APPLE__
+    char bgm_path[64];
+
+    if (getenv("KUMDOR_NO_BGM") != NULL) {
+        return;
+    }
+
+    snprintf(bgm_path, sizeof(bgm_path), "BGM/kumdor_%02d.m4a", stage_number);
+    if (access(bgm_path, R_OK) != 0) {
+        printf("%s[BGM]%s %s が見つからないため、このステージは無音で進みます。\n",
+               color(COLOR_BLUE),
+               color(COLOR_RESET),
+               bgm_path);
+        return;
+    }
+
+    stop_bgm();
+
+    bgm_pid = fork();
+    if (bgm_pid < 0) {
+        printf("%s[警告]%s BGMを開始できませんでした。\n",
+               color(COLOR_RED),
+               color(COLOR_RESET));
+        return;
+    }
+
+    if (bgm_pid == 0) {
+        if (setpgid(0, 0) != 0) {
+            _exit(1);
+        }
+
+        _exit(play_bgm_loop(bgm_path, 0.45f));
+    }
+
+    setpgid(bgm_pid, bgm_pid);
+    printf("%s[BGM]%s %s を再生します。\n", color(COLOR_BLUE), color(COLOR_RESET), bgm_path);
+#else
+    (void)stage_number;
+#endif
+}
+
+static void stop_bgm(void) {
+#ifdef __APPLE__
+    if (bgm_pid <= 0) {
+        return;
+    }
+
+    kill(-bgm_pid, SIGTERM);
+    waitpid(bgm_pid, NULL, 0);
+    bgm_pid = -1;
+#endif
+}
+
+static void cleanup_audio(void) {
+    stop_bgm();
 }
 
 static const char *color(const char *code) {

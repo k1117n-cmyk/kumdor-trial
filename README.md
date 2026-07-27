@@ -37,6 +37,7 @@ https://pc-fan.net/kumdor-trial-c-terminal-typing-rpg/
 - 戦闘中の状態表示
 - 大文字・小文字を区別したタイピング判定
 - 英字、数字、記号を含む課題の出題
+- macOSでのステージ別BGM再生
 
 ## 必要な環境
 
@@ -44,6 +45,7 @@ https://pc-fan.net/kumdor-trial-c-terminal-typing-rpg/
 - `make`
 
 macOSでは、Command Line Tools が入っていればビルドできます。
+ステージ別BGMはmacOS標準のAVFoundationを使ってループ再生します。
 
 ## ビルド
 
@@ -74,6 +76,14 @@ make run
 
 ```sh
 NO_COLOR=1 ./kumdor_01
+```
+
+macOSでは、`BGM/kumdor_01.m4a` のようなステージ番号付きファイルがある場合、ステージ開始時にBGMを再生します。
+対応するBGMファイルがないステージは無音で続行します。
+BGMを鳴らしたくない場合は、`KUMDOR_NO_BGM=1` を付けて実行できます。
+
+```sh
+KUMDOR_NO_BGM=1 ./kumdor_01
 ```
 
 セーブデータがある場合は、起動時にロードするか確認されます。
@@ -174,6 +184,8 @@ make clean
 | `include/game.h` | 共有する定数、構造体、公開関数の宣言 |
 | `src/game.c` | ゲーム進行、戦闘、セーブ、スコア表示 |
 | `src/stages.c` | ステージ、敵、出題課題、物語文の定義 |
+| `src/bgm_player.m` | macOS用BGMループ再生 |
+| `BGM/` | ステージ別BGMファイル |
 | `Makefile` | ビルド、実行、クリーンアップ用 |
 | `LICENSE` | ライセンス |
 | `.gitignore` | Git管理しない生成物の指定 |
