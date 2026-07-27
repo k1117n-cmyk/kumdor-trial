@@ -15,6 +15,7 @@ static void print_ending(const Player *player);
 static void print_battle_start(const Enemy *enemy);
 static void print_battle_status(const Player *player, const Enemy *enemy);
 static void print_score(const Player *player, int stage_count);
+static const char *status_name(unsigned char status);
 static void gain_exp(Player *player, int exp);
 static int load_game(Player *player, int *start_stage, int stage_count);
 static int save_game(const Player *player, int next_stage, int stage_count);
@@ -175,13 +176,14 @@ static void print_battle_start(const Enemy *enemy) {
 }
 
 static void print_battle_status(const Player *player, const Enemy *enemy) {
-    printf("%s Lv:%d EXP:%d/%d HP: %d/%d | %s HP: %d/%d\n",
+    printf("%s Lv:%d EXP:%d/%d HP: %d/%d 状態:%s | %s HP: %d/%d\n",
            player->name,
            player->level,
            player->exp,
            EXP_TO_LEVEL_UP,
            player->hp,
            player->max_hp,
+           status_name(player->status),
            enemy->name,
            enemy->hp,
            enemy->max_hp);
@@ -216,6 +218,22 @@ static void print_score(const Player *player, int stage_count) {
     }
 
     printf("=========================================\n");
+}
+
+static const char *status_name(unsigned char status) {
+    if ((status & STATUS_POISON) && (status & STATUS_BLIND)) {
+        return "毒+暗闇";
+    }
+
+    if (status & STATUS_POISON) {
+        return "毒";
+    }
+
+    if (status & STATUS_BLIND) {
+        return "暗闇";
+    }
+
+    return "通常";
 }
 
 static void gain_exp(Player *player, int exp) {
