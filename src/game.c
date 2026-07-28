@@ -576,7 +576,7 @@ static void start_stage_bgm(int stage_number) {
         return;
     }
 
-    snprintf(bgm_path, sizeof(bgm_path), "BGM/kumdor_%02d.m4a", stage_number);
+    snprintf(bgm_path, sizeof(bgm_path), "BGM/kumdor_%02d.wav", stage_number);
     if (access(bgm_path, R_OK) != 0) {
         printf("%s[BGM]%s %s が見つからないため、このステージは無音で進みます。\n",
                color(COLOR_BLUE),

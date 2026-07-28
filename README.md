@@ -78,7 +78,7 @@ make run
 NO_COLOR=1 ./kumdor_01
 ```
 
-macOSでは、`BGM/kumdor_01.m4a` のようなステージ番号付きファイルがある場合、ステージ開始時にBGMを再生します。
+macOSでは、`BGM/kumdor_01.wav` のようなステージ番号付きファイルがある場合、ステージ開始時にBGMを再生します。
 対応するBGMファイルがないステージは無音で続行します。
 BGMを鳴らしたくない場合は、`KUMDOR_NO_BGM=1` を付けて実行できます。
 
