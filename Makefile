@@ -1,7 +1,7 @@
 CC := cc
 CFLAGS := -Wall -Wextra -pedantic -Iinclude
 TARGET := kumdor_01
-SOURCES := kumdor_01.c src/game.c src/stages.c
+SOURCES := kumdor_01.c src/game.c src/stages.c src/audio.c src/save.c src/battle.c
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
@@ -13,7 +13,7 @@ endif
 
 all: $(TARGET)
 
-$(TARGET): $(SOURCES) include/game.h
+$(TARGET): $(SOURCES) include/game.h include/audio.h include/save.h include/battle.h
 	$(CC) $(CFLAGS) $(SOURCES) $(LDFLAGS) -o $(TARGET)
 
 run: $(TARGET)
