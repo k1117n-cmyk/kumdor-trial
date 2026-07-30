@@ -31,6 +31,8 @@ static const char *enemy_trait_description(EnemyTrait trait);
 static void print_help(void);
 static int read_input(char input[], int hide_echo);
 static int is_correct_input(const char input[], const char target[]);
+static void print_miss_hint(const char input[], const char target[]);
+static const char *choose_message(const char *const messages[], int message_count);
 static EnemyIntent choose_enemy_intent(const Enemy *enemy, int is_climax);
 static void print_enemy_intent(EnemyIntent intent, const Enemy *enemy);
 static void apply_miss_blind(Player *player, int current_stage);
@@ -57,7 +59,9 @@ void print_battle_start(const Enemy *enemy) {
 }
 
 void print_battle_status(const Player *player, const Enemy *enemy) {
-    printf("%s Lv:%d EXP:%d/%d HP: %s%d/%d%s 状態:%s%s%s | %s%s%s HP: %d/%d\n",
+    printf("%s[状態]%s %s Lv:%d EXP:%d/%d HP:%s%d/%d%s 状態:%s%s%s | %s%s%s HP:%d/%d\n",
+           color(COLOR_BLUE),
+           color(COLOR_RESET),
            player->name,
            player->level,
            player->exp,
@@ -85,14 +89,21 @@ int player_turn(Player *player, Enemy *enemy, const char target[], int current_s
     print_enemy_intent(intent, enemy);
 
     if (player->status & STATUS_BLIND) {
-        printf("敵の構え: [ %s%s%s ] %s(視界が悪い！正確に打ち込め！)%s\n",
+        printf("%s[課題]%s %s%s%s %s(暗闇: 入力は表示されない)%s\n",
+               color(COLOR_YELLOW),
+               color(COLOR_RESET),
                color(COLOR_YELLOW),
                target,
                color(COLOR_RESET),
                color(COLOR_RED),
                color(COLOR_RESET));
     } else {
-        printf("敵の構え: [ %s%s%s ]\n", color(COLOR_YELLOW), target, color(COLOR_RESET));
+        printf("%s[課題]%s %s%s%s\n",
+               color(COLOR_YELLOW),
+               color(COLOR_RESET),
+               color(COLOR_YELLOW),
+               target,
+               color(COLOR_RESET));
     }
 
     if (!read_input(input, (player->status & STATUS_BLIND) != 0)) {
@@ -120,20 +131,20 @@ int player_turn(Player *player, Enemy *enemy, const char target[], int current_s
 
     if (strcmp(input, SAVE_COMMAND) == 0) {
         save_game(player, current_stage, stage_count);
-        printf("%s➔ セーブしました。現在のステージの先頭から再開できます。%s\n",
+        printf("%s➔ 記録を刻んだ。次はこの試練の入口から始まる。%s\n",
                color(COLOR_BLUE),
                color(COLOR_RESET));
         return 1;
     }
 
     if (strcmp(input, QUIT_COMMAND) == 0) {
-        printf("%s➔ 保存せずに終了します。%s\n", color(COLOR_BLUE), color(COLOR_RESET));
+        printf("%s➔ 記録を刻まず、ここで剣を収める。%s\n", color(COLOR_BLUE), color(COLOR_RESET));
         return 0;
     }
 
     if (strcmp(input, SAVE_QUIT_COMMAND) == 0) {
         save_game(player, current_stage, stage_count);
-        printf("%s➔ セーブして終了します。%s\n", color(COLOR_BLUE), color(COLOR_RESET));
+        printf("%s➔ 記録を刻んだ。ここで剣を収める。%s\n", color(COLOR_BLUE), color(COLOR_RESET));
         return 0;
     }
 
@@ -141,6 +152,9 @@ int player_turn(Player *player, Enemy *enemy, const char target[], int current_s
         player->correct_count++;
         player->stage_correct_counts[current_stage]++;
         player->combo_count++;
+        if (player->combo_count > player->stage_max_combo_counts[current_stage]) {
+            player->stage_max_combo_counts[current_stage] = player->combo_count;
+        }
 
         if (player->status & STATUS_POISON) {
             printf("%s➔ 毒のせいで攻撃が届かない！%s\n", color(COLOR_YELLOW), color(COLOR_RESET));
@@ -176,6 +190,7 @@ int player_turn(Player *player, Enemy *enemy, const char target[], int current_s
         printf("%s➔ ミス！ 手元が狂った！（反撃を受ける！）%s\n",
                color(COLOR_RED),
                color(COLOR_RESET));
+        print_miss_hint(input, target);
         enemy_turn(player, enemy, intent);
         apply_miss_blind(player, current_stage);
     }
@@ -224,7 +239,7 @@ static const char *enemy_trait_description(EnemyTrait trait) {
         case ENEMY_TRAIT_BLIND_EDGE:
             return "反撃時と敵が本気を出した後に一時的な暗闇を付与する";
         case ENEMY_TRAIT_REGEN_COUNTER:
-            return "反撃時に自分のHPを1回復する";
+            return "本気状態中の反撃時に自分のHPを1回復する";
         case ENEMY_TRAIT_STANDARD:
         default:
             return "特別な追加効果はない";
@@ -233,17 +248,20 @@ static const char *enemy_trait_description(EnemyTrait trait) {
 
 static void print_help(void) {
     printf("\n%s【ヘルプ】%s\n", color(COLOR_BLUE), color(COLOR_RESET));
-    printf("表示された課題を完全一致で入力すると攻撃します。大文字・小文字、スペース、記号も区別します。\n");
+    printf("[課題] に表示された文字列を完全一致で入力すると攻撃します。大文字・小文字、スペース、記号も区別します。\n");
+    printf("[状態] にはHP、状態異常、敵HPが表示されます。\n");
     printf("毒状態では、正解しても攻撃できず毒の解除に使われます。\n");
     printf("暗闇状態では、入力中の文字が画面に表示されません。正解すると解除されます。\n");
-    printf("タイプミスすると敵が反撃します。コマンド入力はターンを消費しません。\n");
-    printf("敵には特性があります。戦闘開始時の説明を見て、ミス時の反撃に注意してください。\n");
+    printf("タイプミスすると敵が反撃し、入力のずれに応じた短いヒントが出ます。\n");
+    printf("3連続正解するたびに追加の一撃が入ります。\n");
+    printf("コマンド入力はターンを消費しません。\n");
     printf("コマンド:\n");
-    printf("  %s       現在ステージの先頭から再開できる状態で保存\n", SAVE_COMMAND);
-    printf("  %s       保存せずに終了\n", QUIT_COMMAND);
-    printf("  %s   保存して終了\n", SAVE_QUIT_COMMAND);
-    printf("  %s / %s BGMのON/OFFを切り替え\n", BGM_COMMAND, MUTE_COMMAND);
-    printf("  %s       このヘルプを表示\n\n", HELP_COMMAND);
+    printf("  %-10s 現在ステージの入口に記録を刻む\n", SAVE_COMMAND);
+    printf("  %-10s 記録せずに終了\n", QUIT_COMMAND);
+    printf("  %-10s 記録を刻んで終了\n", SAVE_QUIT_COMMAND);
+    printf("  %-10s このヘルプを表示\n", HELP_COMMAND);
+    printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n", BGM_COMMAND);
+    printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n\n", MUTE_COMMAND);
 }
 
 static int read_input(char input[], int hide_echo) {
@@ -293,6 +311,72 @@ static int read_input(char input[], int hide_echo) {
 
 static int is_correct_input(const char input[], const char target[]) {
     return strcmp(input, target) == 0;
+}
+
+static void print_miss_hint(const char input[], const char target[]) {
+    static const char *const short_input_messages[] = {
+        "剣筋が届いていない。最後の一文字まで振り抜け！",
+        "あと一歩で届く。指先の灯を最後まで消すな！",
+        "詠唱が途中で切れた。残りの文字までつなげ！"
+    };
+    static const char *const long_input_messages[] = {
+        "踏み込みすぎた。余分な一打が敵に読まれている！",
+        "勢いが余った。不要な文字が剣先を乱している！",
+        "打鍵がはみ出した。余計な足音を立てるな！"
+    };
+    static const char *const first_char_messages[] = {
+        "初太刀がそれた。最初のキーから構え直せ！",
+        "出だしで足場を踏み外した。最初の一打を見極めろ！",
+        "最初の符が違う。門を開く一文字目を狙え！"
+    };
+    static const char *const middle_char_messages[] = {
+        "%zu文字目で刃がぶれた。そこまでは道筋が見えている！",
+        "%zu文字目で術式が乱れた。流れを切らずに立て直せ！",
+        "%zu文字目に敵の影が差した。そこを越えれば届く！"
+    };
+    size_t input_length = strlen(input);
+    size_t target_length = strlen(target);
+    size_t compare_length = input_length < target_length ? input_length : target_length;
+
+    if (input_length < target_length) {
+        printf("%s（%s）%s\n",
+               color(COLOR_YELLOW),
+               choose_message(short_input_messages, (int)(sizeof(short_input_messages) / sizeof(short_input_messages[0]))),
+               color(COLOR_RESET));
+        return;
+    }
+
+    if (input_length > target_length) {
+        printf("%s（%s）%s\n",
+               color(COLOR_YELLOW),
+               choose_message(long_input_messages, (int)(sizeof(long_input_messages) / sizeof(long_input_messages[0]))),
+               color(COLOR_RESET));
+        return;
+    }
+
+    for (size_t i = 0; i < compare_length; i++) {
+        if (input[i] == target[i]) {
+            continue;
+        }
+
+        if (i == 0) {
+            printf("%s（%s）%s\n",
+                   color(COLOR_YELLOW),
+                   choose_message(first_char_messages, (int)(sizeof(first_char_messages) / sizeof(first_char_messages[0]))),
+                   color(COLOR_RESET));
+        } else {
+            printf("%s（", color(COLOR_YELLOW));
+            printf(choose_message(middle_char_messages, (int)(sizeof(middle_char_messages) / sizeof(middle_char_messages[0]))),
+                   i + 1);
+            printf("）%s\n",
+                   color(COLOR_RESET));
+        }
+        return;
+    }
+}
+
+static const char *choose_message(const char *const messages[], int message_count) {
+    return messages[rand() % message_count];
 }
 
 static EnemyIntent choose_enemy_intent(const Enemy *enemy, int is_climax) {
@@ -393,10 +477,6 @@ static void enemy_turn(Player *player, Enemy *enemy, EnemyIntent intent) {
         damage++;
     }
 
-    if (intent == ENEMY_INTENT_HEAVY) {
-        damage++;
-    }
-
     player->hp -= damage;
 
     if (player->hp < 0) {
@@ -432,7 +512,8 @@ static void enemy_turn(Player *player, Enemy *enemy, EnemyIntent intent) {
                color(COLOR_RESET));
     }
 
-    if ((enemy->trait == ENEMY_TRAIT_REGEN_COUNTER || intent == ENEMY_INTENT_REGEN) &&
+    if ((intent == ENEMY_INTENT_REGEN ||
+         (enemy->trait == ENEMY_TRAIT_REGEN_COUNTER && enemy->hp * 2 <= enemy->max_hp)) &&
         enemy->hp < enemy->max_hp) {
         enemy->hp++;
         printf("%s（%sは体勢を立て直し、HPを1回復した！ 敵HP: %d/%d）%s\n",

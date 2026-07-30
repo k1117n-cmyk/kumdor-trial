@@ -1,12 +1,22 @@
 #include "save.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#if defined(__unix__) || defined(__APPLE__)
+#include <unistd.h>
+#endif
 
 #define SAVE_FORMAT_HEADER_V1 "KUMDOR_SAVE_V1"
 #define SAVE_FORMAT_HEADER_V2 "KUMDOR_SAVE_V2"
-#define SAVE_FORMAT_HEADER SAVE_FORMAT_HEADER_V2
+#define SAVE_FORMAT_HEADER_V3 "KUMDOR_SAVE_V3"
+#define SAVE_FORMAT_HEADER SAVE_FORMAT_HEADER_V3
 #define VALID_STATUS_MASK (STATUS_POISON | STATUS_BLIND)
+#define COLOR_RESET "\033[0m"
+#define COLOR_BLUE  "\033[34m"
+
+static const char *color(const char *code);
 
 int load_game(Player *player, int *start_stage, int stage_count) {
     FILE *file = fopen(SAVE_FILE, "r");
@@ -22,14 +32,27 @@ int load_game(Player *player, int *start_stage, int stage_count) {
 
     if (stage_count > MAX_STAGE_COUNT) {
         fclose(file);
-        printf("ステージ数がスコア記録の上限を超えています。新しく始めます。\n");
+        printf("試練の数が記録の石板に収まりません。新たに試練へ向かいます。\n");
         return 0;
     }
 
-    printf("セーブデータが見つかりました。ロードしますか？ (y/n): ");
-    if (fgets(answer, INPUT_BUFFER_SIZE, stdin) == NULL || (answer[0] != 'y' && answer[0] != 'Y')) {
+    printf("記録の石板が見つかりました。\n");
+    printf("前回の続きから始めますか？ (y/n): ");
+    if (fgets(answer, INPUT_BUFFER_SIZE, stdin) == NULL) {
         fclose(file);
-        printf("新しく始めます。\n");
+        printf("記録を使わず、新たに試練へ向かいます。\n");
+        return 0;
+    }
+
+#if defined(__unix__) || defined(__APPLE__)
+    if (!isatty(STDIN_FILENO)) {
+        printf("\n");
+    }
+#endif
+
+    if (answer[0] != 'y' && answer[0] != 'Y') {
+        fclose(file);
+        printf("記録を使わず、新たに試練へ向かいます。\n");
         return 0;
     }
 
@@ -47,11 +70,24 @@ int load_game(Player *player, int *start_stage, int stage_count) {
                &loaded_player.level,
                &loaded_player.exp) != 11) {
         fclose(file);
-        printf("セーブデータを読み取れませんでした。新しく始めます。\n");
+        printf("記録の石板を読み取れませんでした。新たに試練へ向かいます。\n");
         return 0;
     }
 
-    if (strcmp(header, SAVE_FORMAT_HEADER_V2) == 0) {
+    if (strcmp(header, SAVE_FORMAT_HEADER_V3) == 0) {
+        for (int stage = 0; stage < MAX_STAGE_COUNT; stage++) {
+            if (fscanf(file,
+                       "%d %d %d %d",
+                       &loaded_player.stage_correct_counts[stage],
+                       &loaded_player.stage_miss_counts[stage],
+                       &loaded_player.stage_input_error_counts[stage],
+                       &loaded_player.stage_max_combo_counts[stage]) != 4) {
+                fclose(file);
+                printf("記録の石板を読み取れませんでした。新たに試練へ向かいます。\n");
+                return 0;
+            }
+        }
+    } else if (strcmp(header, SAVE_FORMAT_HEADER_V2) == 0) {
         for (int stage = 0; stage < MAX_STAGE_COUNT; stage++) {
             if (fscanf(file,
                        "%d %d %d",
@@ -59,13 +95,13 @@ int load_game(Player *player, int *start_stage, int stage_count) {
                        &loaded_player.stage_miss_counts[stage],
                        &loaded_player.stage_input_error_counts[stage]) != 3) {
                 fclose(file);
-                printf("セーブデータを読み取れませんでした。新しく始めます。\n");
+                printf("記録の石板を読み取れませんでした。新たに試練へ向かいます。\n");
                 return 0;
             }
         }
     } else if (strcmp(header, SAVE_FORMAT_HEADER_V1) != 0) {
         fclose(file);
-        printf("セーブデータの形式が不明です。新しく始めます。\n");
+        printf("記録の刻印が読み取れません。新たに試練へ向かいます。\n");
         return 0;
     }
 
@@ -86,21 +122,23 @@ int load_game(Player *player, int *start_stage, int stage_count) {
         loaded_player.level <= 0 ||
         loaded_player.exp < 0 ||
         loaded_player.exp >= EXP_TO_LEVEL_UP) {
-        printf("セーブデータの内容が不正です。新しく始めます。\n");
+        printf("記録の石板に乱れがあります。新たに試練へ向かいます。\n");
         return 0;
     }
 
     for (int stage = 0; stage < MAX_STAGE_COUNT; stage++) {
         if (loaded_player.stage_correct_counts[stage] < 0 ||
             loaded_player.stage_miss_counts[stage] < 0 ||
-            loaded_player.stage_input_error_counts[stage] < 0) {
-            printf("セーブデータのステージ別成績が不正です。新しく始めます。\n");
+            loaded_player.stage_input_error_counts[stage] < 0 ||
+            loaded_player.stage_max_combo_counts[stage] < 0 ||
+            loaded_player.stage_max_combo_counts[stage] > loaded_player.stage_correct_counts[stage]) {
+            printf("ステージ別の記録に乱れがあります。新たに試練へ向かいます。\n");
             return 0;
         }
     }
 
     if (next_stage >= stage_count) {
-        printf("セーブデータはクリア済みです。新しく始めます。\n");
+        printf("完全勝利の証が刻まれています。新たな試練として始めます。\n");
         return 0;
     }
 
@@ -108,7 +146,7 @@ int load_game(Player *player, int *start_stage, int stage_count) {
     *player = loaded_player;
     *start_stage = next_stage;
 
-    printf("セーブデータをロードしました。第%dステージから再開します。\n", *start_stage + 1);
+    printf("記録の石板を読み込んだ。第%dステージの入口から再開する。\n", *start_stage + 1);
     return 1;
 }
 
@@ -117,7 +155,9 @@ int save_game(const Player *player, int next_stage, int stage_count) {
     unsigned int saved_status = STATUS_NORMAL;
 
     if (file == NULL) {
-        printf("[警告] セーブデータを書き込めませんでした。\n");
+        printf("%s[記録]%s 記録の石板に刻めませんでした。\n",
+               color(COLOR_BLUE),
+               color(COLOR_RESET));
         return 0;
     }
 
@@ -137,19 +177,29 @@ int save_game(const Player *player, int next_stage, int stage_count) {
 
     for (int stage = 0; stage < MAX_STAGE_COUNT; stage++) {
         fprintf(file,
-                "%d %d %d\n",
+                "%d %d %d %d\n",
                 player->stage_correct_counts[stage],
                 player->stage_miss_counts[stage],
-                player->stage_input_error_counts[stage]);
+                player->stage_input_error_counts[stage],
+                player->stage_max_combo_counts[stage]);
     }
 
     fclose(file);
 
     if (next_stage < stage_count) {
-        printf("[セーブ] 第%dステージから再開できます。\n", next_stage + 1);
+        printf("%s[記録]%s 第%dステージの入口に記録を刻みました。\n",
+               color(COLOR_BLUE),
+               color(COLOR_RESET),
+               next_stage + 1);
     } else {
-        printf("[セーブ] 完全勝利の記録を保存しました。\n");
+        printf("%s[記録]%s 完全勝利の証を石板に刻みました。\n",
+               color(COLOR_BLUE),
+               color(COLOR_RESET));
     }
 
     return 1;
+}
+
+static const char *color(const char *code) {
+    return getenv("NO_COLOR") == NULL ? code : "";
 }

@@ -9,7 +9,7 @@ SOURCES += src/bgm_player.m
 LDFLAGS += -framework Foundation -framework AVFoundation
 endif
 
-.PHONY: all run clean
+.PHONY: all run check-save clean
 
 all: $(TARGET)
 
@@ -18,6 +18,9 @@ $(TARGET): $(SOURCES) include/game.h include/audio.h include/save.h include/batt
 
 run: $(TARGET)
 	./$(TARGET)
+
+check-save: $(TARGET)
+	sh scripts/check_save.sh
 
 clean:
 	rm -f $(TARGET) *.o src/*.o *.out

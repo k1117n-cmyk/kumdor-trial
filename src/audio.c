@@ -14,6 +14,10 @@ extern int play_bgm_loop(const char *path, float volume);
 #endif
 
 #define DEFAULT_BGM_VOLUME 0.45f
+#define COLOR_RESET "\033[0m"
+#define COLOR_BLUE  "\033[34m"
+
+static const char *color(const char *code);
 
 #ifdef __APPLE__
 static pid_t bgm_pid = -1;
@@ -35,7 +39,6 @@ void start_stage_bgm(int stage_number) {
 
     snprintf(bgm_path, sizeof(bgm_path), "BGM/kumdor_%02d.wav", stage_number);
     if (access(bgm_path, R_OK) != 0) {
-        printf("[BGM] %s が見つからないため、このステージは無音で進みます。\n", bgm_path);
         return;
     }
 
@@ -43,7 +46,9 @@ void start_stage_bgm(int stage_number) {
 
     bgm_pid = fork();
     if (bgm_pid < 0) {
-        printf("[警告] BGM再生を開始できませんでした。このステージは無音で進みます。\n");
+        printf("%s[音]%s BGMを開始できませんでした。このステージは無音で進みます。\n",
+               color(COLOR_BLUE),
+               color(COLOR_RESET));
         return;
     }
 
@@ -56,7 +61,11 @@ void start_stage_bgm(int stage_number) {
     }
 
     setpgid(bgm_pid, bgm_pid);
-    printf("[BGM] %s を再生します。（音量: %.2f）\n", bgm_path, volume);
+    printf("%s[音]%s BGM: %s (音量 %.2f)\n",
+           color(COLOR_BLUE),
+           color(COLOR_RESET),
+           bgm_path,
+           volume);
 #else
     (void)stage_number;
 #endif
@@ -65,23 +74,27 @@ void start_stage_bgm(int stage_number) {
 void toggle_bgm(void) {
 #ifdef __APPLE__
     if (getenv("KUMDOR_NO_BGM") != NULL) {
-        printf("[BGM] KUMDOR_NO_BGM=1 のため、ゲーム中の切り替えは無効です。\n");
+        printf("%s[音]%s KUMDOR_NO_BGM=1 のため、BGM切り替えは無効です。\n",
+               color(COLOR_BLUE),
+               color(COLOR_RESET));
         return;
     }
 
     if (bgm_muted) {
         bgm_muted = 0;
-        printf("[BGM] ONにしました。\n");
+        printf("%s[音]%s BGMをONにしました。\n", color(COLOR_BLUE), color(COLOR_RESET));
         if (current_stage_number > 0) {
             start_stage_bgm(current_stage_number);
         }
     } else {
         bgm_muted = 1;
         stop_bgm();
-        printf("[BGM] OFFにしました。\n");
+        printf("%s[音]%s BGMをOFFにしました。\n", color(COLOR_BLUE), color(COLOR_RESET));
     }
 #else
-    printf("[BGM] この環境ではBGM再生に対応していません。\n");
+    printf("%s[音]%s この環境ではBGM再生に対応していません。\n",
+           color(COLOR_BLUE),
+           color(COLOR_RESET));
 #endif
 }
 
@@ -99,6 +112,10 @@ void stop_bgm(void) {
 
 void cleanup_audio(void) {
     stop_bgm();
+}
+
+static const char *color(const char *code) {
+    return getenv("NO_COLOR") == NULL ? code : "";
 }
 
 #ifdef __APPLE__

@@ -8,7 +8,7 @@
 #define INPUT_BUFFER_SIZE 64
 #define EXP_TO_LEVEL_UP 10
 #define MAX_STAGE_COUNT 10
-#define GAME_VERSION "v0.4.0"
+#define GAME_VERSION "v0.5.0"
 #define SAVE_FILE "kumdor_save.txt"
 #define SAVE_COMMAND ":save"
 #define QUIT_COMMAND ":quit"
@@ -34,6 +34,7 @@ typedef struct {
     int stage_correct_counts[MAX_STAGE_COUNT];
     int stage_miss_counts[MAX_STAGE_COUNT];
     int stage_input_error_counts[MAX_STAGE_COUNT];
+    int stage_max_combo_counts[MAX_STAGE_COUNT];
 } Player;
 
 typedef enum {
@@ -59,6 +60,7 @@ typedef struct {
     const char *lesson;
     const char *tip;
     const char *enemy_quote;
+    const char *defeat_quote;
     const char *const *words;
     int word_count;
     const char *climax_message;
@@ -68,6 +70,9 @@ typedef struct {
     int reward_heal;
     int exp_reward;
     const char *clear_story;
+    const char *rest_story;
+    const char *rest_hint;
+    int rest_heal;
 } Stage;
 
 const Stage *get_stages(int *stage_count);

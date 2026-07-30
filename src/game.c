@@ -21,11 +21,19 @@ static void print_prologue(void);
 static void print_stage_transition(int next_stage_number, int stage_count);
 static void print_stage_intro(int stage_number, int stage_count, const Stage *stage);
 static void print_stage_clear(int stage_number, const Stage *stage, Player *player);
+static void apply_rest_event(const Stage *stage, Player *player, int stage_index);
+static void print_rest_bonus_event(int stage_index);
+static void print_rest_fortune(void);
+static void print_rest_kum_moose(void);
+static void print_rest_supply_cart(void);
 static void print_stage_climax(const Stage *stage);
 static void print_enemy_quote(const Stage *stage);
+static void print_defeat_quote(const Stage *stage);
 static void print_ending(const Player *player);
-static void print_score(const Player *player, int stage_count);
+static void print_score(const Player *player, int stage_count, int quit_requested);
 static void print_stage_scores(const Player *player, int stage_count);
+static const char *stage_clear_rank(double accuracy, int miss, int input_error, int max_combo);
+static const char *stage_clear_rank_color(const char *rank);
 static void gain_exp(Player *player, int exp);
 static int prompt_next_stage(int next_stage_number, int stage_count);
 static const char *choose_target(const char *const words[], int word_count);
@@ -63,6 +71,7 @@ int run_game(void) {
         print_stage_intro(stage + 1, stage_count, &stages[stage]);
         print_battle_start(&enemy);
         print_enemy_quote(&stages[stage]);
+        player.combo_count = 0;
 
         int climax_started = 0;
 
@@ -94,6 +103,7 @@ int run_game(void) {
         if (player.hp > 0 && !quit_requested) {
             print_stage_clear(stage + 1, &stages[stage], &player);
             stop_bgm();
+            apply_rest_event(&stages[stage], &player, stage);
             save_game(&player, stage + 1, stage_count);
             if (stage + 1 < stage_count && !prompt_next_stage(stage + 2, stage_count)) {
                 quit_requested = 1;
@@ -117,7 +127,7 @@ int run_game(void) {
         printf("もう一度挑戦して、クムドールの試練を突破しよう！\n");
     }
 
-    print_score(&player, stage_count);
+    print_score(&player, stage_count, quit_requested);
 
     return 0;
 }
@@ -184,6 +194,7 @@ static void print_stage_clear(int stage_number, const Stage *stage, Player *play
     printf("\n%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
     printf("%s【ステージ%d突破】%s\n", color(COLOR_GREEN), stage_number, color(COLOR_RESET));
     printf("%s%sを倒した！%s\n", color(COLOR_GREEN), stage->enemy.name, color(COLOR_RESET));
+    print_defeat_quote(stage);
     gain_exp(player, stage->exp_reward);
 
     if (stage->reward_heal > 0 && player->hp < player->max_hp) {
@@ -205,20 +216,150 @@ static void print_stage_clear(int stage_number, const Stage *stage, Player *play
     int correct = player->stage_correct_counts[stage_index];
     int miss = player->stage_miss_counts[stage_index];
     int input_error = player->stage_input_error_counts[stage_index];
+    int max_combo = player->stage_max_combo_counts[stage_index];
     int total = correct + miss + input_error;
     double accuracy = 0.0;
+    const char *rank;
 
     if (total > 0) {
         accuracy = ((double)correct / (double)total) * 100.0;
     }
 
-    printf("ステージ成績: 正解 %d / ミス %d / 入力失敗 %d / 命中率 %.1f%%\n",
+    rank = stage_clear_rank(accuracy, miss, input_error, max_combo);
+
+    printf("ステージ成績: 正解 %d / ミス %d / 入力失敗 %d / 命中率 %.1f%% / 最大連続正解 %d\n",
            correct,
            miss,
            input_error,
-           accuracy);
+           accuracy,
+           max_combo);
+    printf("突破評価    : %s%s%s\n",
+           stage_clear_rank_color(rank),
+           rank,
+           color(COLOR_RESET));
     printf("%s\n", stage->clear_story);
     printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+}
+
+static void apply_rest_event(const Stage *stage, Player *player, int stage_index) {
+    int healed = 0;
+    int printed_rest_result = 0;
+
+    if ((stage->rest_story == NULL || stage->rest_story[0] == '\0') &&
+        (stage->rest_hint == NULL || stage->rest_hint[0] == '\0') &&
+        stage->rest_heal <= 0) {
+        return;
+    }
+
+    printf("\n%s【休息】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+
+    if (stage->rest_story != NULL && stage->rest_story[0] != '\0') {
+        printf("%s\n\n", stage->rest_story);
+    }
+
+    print_rest_bonus_event(stage_index);
+    printf("\n");
+
+    if (stage->rest_heal > 0 && player->hp < player->max_hp) {
+        int before = player->hp;
+
+        player->hp += stage->rest_heal;
+        if (player->hp > player->max_hp) {
+            player->hp = player->max_hp;
+        }
+
+        healed = player->hp - before;
+    }
+
+    if (player->status != STATUS_NORMAL) {
+        player->status = STATUS_NORMAL;
+        printf("%s状態異常が消えた。指先の感覚が戻ってくる。%s\n",
+               color(COLOR_GREEN),
+               color(COLOR_RESET));
+        printed_rest_result = 1;
+    }
+
+    if (healed > 0) {
+        printf("%sHPが%d回復した。%s (あなたのHP: %d/%d)\n",
+               color(COLOR_GREEN),
+               healed,
+               color(COLOR_RESET),
+               player->hp,
+               player->max_hp);
+        printed_rest_result = 1;
+    }
+
+    if (stage->rest_hint != NULL && stage->rest_hint[0] != '\0') {
+        if (printed_rest_result) {
+            printf("\n");
+        }
+        printf("%s次の助言: %s%s\n",
+               color(COLOR_YELLOW),
+               stage->rest_hint,
+               color(COLOR_RESET));
+    }
+}
+
+static void print_rest_bonus_event(int stage_index) {
+    int rest_event = (stage_index / 3 + 1) % 3;
+
+    if (rest_event == 1) {
+        print_rest_kum_moose();
+    } else if (rest_event == 2) {
+        print_rest_supply_cart();
+    } else {
+        print_rest_fortune();
+    }
+}
+
+static void print_rest_fortune(void) {
+    static const char *const fortunes[] = {
+        "焦る指は敵の影を追う。息を整えれば、次のキーが先に見える。",
+        "打ち損じは敗北ではない。戻る場所を知るための足跡だ。",
+        "長い課題ほど、最初の一打を静かに置け。剣はそこから伸びる。",
+        "記号は罠ではない。形を見てから打てば、ただの道しるべになる。"
+    };
+    const char *message = fortunes[rand() % (int)(sizeof(fortunes) / sizeof(fortunes[0]))];
+
+    printf("%s【旅の札】%s %s\n",
+           color(COLOR_MAGENTA),
+           color(COLOR_RESET),
+           message);
+}
+
+static void print_rest_kum_moose(void) {
+    static const char *const moose_messages[] = {
+        "ホームポジションへ戻れ、モォォ……",
+        "スペースも剣筋の一部、モォォ……",
+        "Shiftは焦らず押せ、モォォ……"
+    };
+    const char *message = moose_messages[rand() % (int)(sizeof(moose_messages) / sizeof(moose_messages[0]))];
+
+    printf("%s【クムムースの助言】%s\n",
+           color(COLOR_MAGENTA),
+           color(COLOR_RESET));
+    printf("  < %s >\n", message);
+    printf("    o   \\_\\_    _/_/\n");
+    printf("     o      \\__/\n");
+    printf("            (oo)\\_______\n");
+    printf("            (__)\\       )\\/\\\n");
+    printf("                ||----w |\n");
+    printf("                ||     ||\n");
+}
+
+static void print_rest_supply_cart(void) {
+    static const char *const cargo_messages[] = {
+        "温かいスープ",
+        "替えの手袋",
+        "磨かれたキーキャップ"
+    };
+    const char *cargo = cargo_messages[rand() % (int)(sizeof(cargo_messages) / sizeof(cargo_messages[0]))];
+
+    printf("%s【補給車クム3号】%s  ==[ %s ]==>\n",
+           color(COLOR_MAGENTA),
+           color(COLOR_RESET),
+           cargo);
+    printf("小さな補給車が通り過ぎ、休息の場に少しだけ笑いが戻った。\n");
 }
 
 static void print_stage_climax(const Stage *stage) {
@@ -238,6 +379,14 @@ static void print_enemy_quote(const Stage *stage) {
     printf("%s%s%s\n\n", color(COLOR_MAGENTA), stage->enemy_quote, color(COLOR_RESET));
 }
 
+static void print_defeat_quote(const Stage *stage) {
+    if (stage->defeat_quote == NULL || stage->defeat_quote[0] == '\0') {
+        return;
+    }
+
+    printf("%s%s%s\n", color(COLOR_MAGENTA), stage->defeat_quote, color(COLOR_RESET));
+}
+
 static void print_ending(const Player *player) {
     printf("\n%s【完全勝利】%s\n", color(COLOR_GREEN), color(COLOR_RESET));
     printf("%sが最後の課題を打ち抜いた瞬間、クムドールの剣がまばゆく輝いた！\n",
@@ -248,7 +397,7 @@ static void print_ending(const Player *player) {
     printf("あなたのタイピングスキルがレベルアップした！\n");
 }
 
-static void print_score(const Player *player, int stage_count) {
+static void print_score(const Player *player, int stage_count, int quit_requested) {
     int total_inputs = player->correct_count + player->miss_count + player->input_error_count;
     double accuracy = 0.0;
 
@@ -258,7 +407,15 @@ static void print_score(const Player *player, int stage_count) {
 
     printf("\n%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
     printf("%s【スコア】%s\n", color(COLOR_MAGENTA), color(COLOR_RESET));
-    printf("到達ステージ: %d/%d\n", player->reached_stage, stage_count);
+    if (player->hp <= 0) {
+        printf("結果        : 第%d/%dステージで敗北\n", player->reached_stage, stage_count);
+    } else if (player->reached_stage >= stage_count && !quit_requested) {
+        printf("結果        : 全%dステージ突破\n", stage_count);
+    } else if (quit_requested) {
+        printf("結果        : 第%d/%dステージで中断\n", player->reached_stage, stage_count);
+    } else {
+        printf("結果        : 第%d/%dステージまで到達\n", player->reached_stage, stage_count);
+    }
     printf("レベル      : %d\n", player->level);
     printf("経験値      : %d/%d\n", player->exp, EXP_TO_LEVEL_UP);
     printf("正解数      : %d\n", player->correct_count);
@@ -278,6 +435,38 @@ static void print_score(const Player *player, int stage_count) {
     }
 
     printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+}
+
+static const char *stage_clear_rank(double accuracy, int miss, int input_error, int max_combo) {
+    if (accuracy >= 100.0 && max_combo >= 8) {
+        return "無傷の剣筋";
+    }
+
+    if (accuracy >= 90.0 && miss == 0 && input_error == 0) {
+        return "集中の剣筋";
+    }
+
+    if (accuracy >= 80.0) {
+        return "安定突破";
+    }
+
+    if (miss + input_error >= 4) {
+        return "危険突破";
+    }
+
+    return "立て直しの一歩";
+}
+
+static const char *stage_clear_rank_color(const char *rank) {
+    if (strcmp(rank, "危険突破") == 0) {
+        return color(COLOR_RED);
+    }
+
+    if (strcmp(rank, "立て直しの一歩") == 0) {
+        return color(COLOR_YELLOW);
+    }
+
+    return color(COLOR_GREEN);
 }
 
 static void print_stage_scores(const Player *player, int stage_count) {
@@ -303,13 +492,14 @@ static void print_stage_scores(const Player *player, int stage_count) {
     }
 
     printf("\nステージ別成績:\n");
-    printf("ST | 正解 | ミス | 失敗 | 命中率\n");
-    printf("---+------+------+------+--------\n");
+    printf("ST | 正解 | ミス | 失敗 | 命中率 | 最大連続\n");
+    printf("---+------+------+------+--------+---------\n");
 
     for (int stage = 0; stage < stage_count; stage++) {
         int correct = player->stage_correct_counts[stage];
         int miss = player->stage_miss_counts[stage];
         int input_error = player->stage_input_error_counts[stage];
+        int max_combo = player->stage_max_combo_counts[stage];
         int total = correct + miss + input_error;
         double accuracy;
 
@@ -318,12 +508,13 @@ static void print_stage_scores(const Player *player, int stage_count) {
         }
 
         accuracy = ((double)correct / (double)total) * 100.0;
-        printf("%2d | %4d | %4d | %4d | %6.1f%%\n",
+        printf("%2d | %4d | %4d | %4d | %6.1f%% | %8d\n",
                stage + 1,
                correct,
                miss,
                input_error,
-               accuracy);
+               accuracy,
+               max_combo);
 
         if (accuracy < weakest_accuracy) {
             weakest_accuracy = accuracy;
@@ -367,10 +558,10 @@ static int prompt_next_stage(int next_stage_number, int stage_count) {
                next_stage_number,
                stage_count,
                color(COLOR_RESET));
-        printf("Enter: 進む / q: ここで終了（セーブ済み）: ");
+        printf("Enter: 進む / q: ここで剣を収める（記録済み）: ");
 
         if (fgets(input, INPUT_BUFFER_SIZE, stdin) == NULL) {
-            printf("\n入力が読み取れなかったため、ここで終了します。第%dステージから再開できます。\n",
+            printf("\n入力が途切れた。次は第%dステージの入口に刻まれた記録から再開する。\n",
                    next_stage_number);
             return 0;
         }
@@ -388,11 +579,11 @@ static int prompt_next_stage(int next_stage_number, int stage_count) {
             strcmp(input, SAVE_COMMAND) == 0 ||
             strcmp(input, QUIT_COMMAND) == 0 ||
             strcmp(input, SAVE_QUIT_COMMAND) == 0) {
-            printf("第%dステージから再開できます。\n", next_stage_number);
+            printf("次は第%dステージの入口に刻まれた記録から再開する。\n", next_stage_number);
             return 0;
         }
 
-        printf("入力が不明です。Enterかqを入力してください。\n");
+        printf("道が定まらない。進むならEnter、剣を収めるならqを入力してください。\n");
     }
 }
 
