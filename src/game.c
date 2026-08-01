@@ -39,6 +39,7 @@ static int run_prestage(const PreStage *prestage, int prestage_number);
 static void print_prestage_intro(const PreStage *prestage, int prestage_number);
 static void print_prestage_help(void);
 static void print_finger_key_map(void);
+static void print_key_map_row(const char *label, const char *const items[], const char *const column_colors[]);
 static int read_line(char input[]);
 static void print_stage_transition(int next_stage_number, int stage_count);
 static void print_stage_intro(int stage_number, int stage_count, const Stage *stage);
@@ -724,15 +725,58 @@ static void print_prestage_help(void) {
 }
 
 static void print_finger_key_map(void) {
+    const char *const column_colors[] = {
+        COLOR_RED,
+        COLOR_YELLOW,
+        COLOR_GREEN,
+        COLOR_CYAN,
+        COLOR_CYAN,
+        COLOR_CYAN,
+        COLOR_CYAN,
+        COLOR_GREEN,
+        COLOR_YELLOW,
+        COLOR_RED
+    };
+    const char *const fingers[] = {"L5", "L4", "L3", "L2", "L2", "R2", "R2", "R3", "R4", "R5"};
+    const char *const numbers[] = {"[1]", "[2]", "[3]", "[4]", "[5]", "[6]", "[7]", "[8]", "[9]", "[0]"};
+    const char *const top[] = {"[q]", "[w]", "[e]", "[r]", "[t]", "[y]", "[u]", "[i]", "[o]", "[p]"};
+    const char *const middle[] = {"[a]", "[s]", "[d]", "[f]", "[g]", "[h]", "[j]", "[k]", "[l]", "[;]"};
+    const char *const bottom[] = {"[z]", "[x]", "[c]", "[v]", "[b]", "[n]", "[m]", "[,]", "[.]", "[/]"};
+
     printf("\n%s【指とキーの対応】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
-    printf("指:  L5  L4  L3  L2  L2     R2  R2  R3  R4  R5\n");
-    printf("数:  [1] [2] [3] [4] [5]    [6] [7] [8] [9] [0]\n");
-    printf("上:  [q] [w] [e] [r] [t]    [y] [u] [i] [o] [p]\n");
-    printf("中:  [a] [s] [d] [f] [g]    [h] [j] [k] [l] [;]\n");
-    printf("下:  [z] [x] [c] [v] [b]    [n] [m] [,] [.] [/]\n");
-    printf("親指:                 [space]\n");
+    print_key_map_row("指", fingers, column_colors);
+    print_key_map_row("数", numbers, column_colors);
+    print_key_map_row("上", top, column_colors);
+    print_key_map_row("中", middle, column_colors);
+    print_key_map_row("下", bottom, column_colors);
+    printf("親指:                 %s[space]%s\n", color(COLOR_MAGENTA), color(COLOR_RESET));
     printf("目印: f=左人差し指の出発点 / j=右人差し指の出発点\n");
-    printf("凡例: L5左小指 L4左薬指 L3左中指 L2左人差し指 / R2右人差し指 R3右中指 R4右薬指 R5右小指\n");
+    printf("凡例: %sL5/R5小指%s %sL4/R4薬指%s %sL3/R3中指%s %sL2/R2人差し指%s / %s親指%s\n",
+           color(COLOR_RED),
+           color(COLOR_RESET),
+           color(COLOR_YELLOW),
+           color(COLOR_RESET),
+           color(COLOR_GREEN),
+           color(COLOR_RESET),
+           color(COLOR_CYAN),
+           color(COLOR_RESET),
+           color(COLOR_MAGENTA),
+           color(COLOR_RESET));
+}
+
+static void print_key_map_row(const char *label, const char *const items[], const char *const column_colors[]) {
+    printf("%s:  ", label);
+    for (int i = 0; i < 10; i++) {
+        if (i == 9) {
+            printf("%s%s%s", color(column_colors[i]), items[i], color(COLOR_RESET));
+        } else {
+            printf("%s%-4s%s", color(column_colors[i]), items[i], color(COLOR_RESET));
+        }
+        if (i == 4) {
+            printf("   ");
+        }
+    }
+    printf("\n");
 }
 
 static int read_line(char input[]) {
