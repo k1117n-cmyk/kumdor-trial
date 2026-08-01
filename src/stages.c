@@ -376,6 +376,56 @@ static const char *const stage10_climax_words[] = {
     "Final-Boss!"
 };
 
+static const char *const stage1_miss_quotes[] = {
+    "「影が打鍵の乱れを拾ったぞ。落ち着いて構え直せ」",
+    "「足元の影に合わせるな。課題の形を見ろ」"
+};
+
+static const char *const stage2_miss_quotes[] = {
+    "「門柱が揺れた。次の一打は静かに置け」",
+    "「左手の門は急ぐほど重くなる。列を見直せ」"
+};
+
+static const char *const stage3_miss_quotes[] = {
+    "「鐘の音が乱れた。右手の列をもう一度見ろ」",
+    "「響きが欠けたな。次は最後まで鳴らせ」"
+};
+
+static const char *const stage4_miss_quotes[] = {
+    "「水面が乱れた。戻る場所を思い出せ」",
+    "「流れに飲まれるな。伸ばす前に構えろ」"
+};
+
+static const char *const stage5_miss_quotes[] = {
+    "「枝先の文字が逃げた。追う前に息を整えろ」",
+    "「森の呪文がほどけた。上段を見てから打て」"
+};
+
+static const char *const stage6_miss_quotes[] = {
+    "「熱が打鍵を乱したな。境目を見直せ」",
+    "「通路が震えた。左右の境を見失うな」"
+};
+
+static const char *const stage7_miss_quotes[] = {
+    "「水晶が揺れた。形を一つずつ見ろ」",
+    "「記号の影が跳ねたな。焦らず形を読め」"
+};
+
+static const char *const stage8_miss_quotes[] = {
+    "「封印がずれた。大小と記号を落ち着いて見ろ」",
+    "「古文書は急がない。違いを見てから刻め」"
+};
+
+static const char *const stage9_miss_quotes[] = {
+    "「数字の階段が揺れた。まとまりで見直せ」",
+    "「座標が乱れた。数字と記号を分けて見ろ」"
+};
+
+static const char *const stage10_miss_quotes[] = {
+    "「剣筋が乱れた。課題全体を見て戻れ」",
+    "「最後の試練は逃げない。一息置いて打ち切れ」"
+};
+
 static const Stage stages[] = {
     {
         {"クムドールの影", 10, 10, 1, ENEMY_TRAIT_STANDARD},
@@ -387,7 +437,8 @@ static const Stage stages[] = {
         "「足元を見るな。指先だけで、わたしを裂いてみろ」",
         "「足元ではなく、前を見ていたか。ならば道は開く」",
         "「影はまだ半分残る。足元より、課題を見ろ」",
-        "「影が打鍵の乱れを拾ったぞ。落ち着いて構え直せ」",
+        stage1_miss_quotes,
+        (int)(sizeof(stage1_miss_quotes) / sizeof(stage1_miss_quotes[0])),
         stage1_words,
         (int)(sizeof(stage1_words) / sizeof(stage1_words[0])),
         "クムドールの影が足元で二つに割れ、左右の指を同時に惑わせてくる。",
@@ -411,7 +462,8 @@ static const Stage stages[] = {
         "「左手の迷いは、門を閉ざす音になる」",
         "「左手の列は覚えられた。次は右手の番だ」",
         "「門柱は重くなる。左手を逃がすな」",
-        "「門柱が揺れた。次の一打は静かに置け」",
+        stage2_miss_quotes,
+        (int)(sizeof(stage2_miss_quotes) / sizeof(stage2_miss_quotes[0])),
         stage2_words,
         (int)(sizeof(stage2_words) / sizeof(stage2_words[0])),
         "左手の番人が門柱を叩き、a s d fの並びを速く刻み始めた。",
@@ -435,7 +487,8 @@ static const Stage stages[] = {
         "「鐘は鳴らぬ。鳴らすのは、おまえの右手だ」",
         "「鐘は鳴った。右手の小指まで届いた証だ」",
         "「鐘楼の影を濃くする。右手だけで見抜け」",
-        "「鐘の音が乱れた。右手の列をもう一度見ろ」",
+        stage3_miss_quotes,
+        (int)(sizeof(stage3_miss_quotes) / sizeof(stage3_miss_quotes[0])),
         stage3_words,
         (int)(sizeof(stage3_words) / sizeof(stage3_words[0])),
         "右手の番人が鐘楼の影を揺らし、セミコロンを混ぜた構えに変えた。",
@@ -459,7 +512,8 @@ static const Stage stages[] = {
         "「水面が揺れた時、戻る場所を忘れるな」",
         "「伸ばした指を戻せる者だけが、深い水を渡れる」",
         "「水底の流れを速める。戻る場所を失うな」",
-        "「水面が乱れた。戻る場所を思い出せ」",
+        stage4_miss_quotes,
+        (int)(sizeof(stage4_miss_quotes) / sizeof(stage4_miss_quotes[0])),
         stage4_words,
         (int)(sizeof(stage4_words) / sizeof(stage4_words[0])),
         "湖底の影が水面を波立たせ、r t y uを続けて打たせる流れを作った。",
@@ -483,7 +537,8 @@ static const Stage stages[] = {
         "「枝先の文字は逃げる。追うなら正確に追え」",
         "「枝先まで届いたか。森の文字も少し息を吹き返す」",
         "「枝先の呪文を重ねる。上段まで届かせろ」",
-        "「枝先の文字が逃げた。追う前に息を整えろ」",
+        stage5_miss_quotes,
+        (int)(sizeof(stage5_miss_quotes) / sizeof(stage5_miss_quotes[0])),
         stage5_words,
         (int)(sizeof(stage5_words) / sizeof(stage5_words[0])),
         "上段の魔術師が枝先の文字を束ね、上段を広く使う呪文に変えた。",
@@ -507,7 +562,8 @@ static const Stage stages[] = {
         "「熱に急かされるな。境目を越える指だけが通れる」",
         "「熱に負けず境目を越えたな。通路はおまえを通す」",
         "「通路の熱を上げる。境目を越える指を見せろ」",
-        "「熱が打鍵を乱したな。境目を見直せ」",
+        stage6_miss_quotes,
+        (int)(sizeof(stage6_miss_quotes) / sizeof(stage6_miss_quotes[0])),
         stage6_words,
         (int)(sizeof(stage6_words) / sizeof(stage6_words[0])),
         "溶岩の番人が通路を赤く染め、中央から下段まで続く重い課題を押し出した。",
@@ -531,7 +587,8 @@ static const Stage stages[] = {
         "「水晶は手元を映さない。記号の影だけを読め」",
         "「記号の影を読んだか。水晶はもう目を惑わせない」",
         "「水晶を曇らせる。記号の影だけを読め」",
-        "「水晶が揺れた。形を一つずつ見ろ」",
+        stage7_miss_quotes,
+        (int)(sizeof(stage7_miss_quotes) / sizeof(stage7_miss_quotes[0])),
         stage7_words,
         (int)(sizeof(stage7_words) / sizeof(stage7_words[0])),
         "水晶洞の幻が記号を反射させ、下段と記号が入り混じる構えになった。",
@@ -555,7 +612,8 @@ static const Stage stages[] = {
         "「古い封印は、ひとつの大小の違いも見逃さない」",
         "「大小の違いを越えた入力だ。封印はここでほどける」",
         "「封印を重ねる。大小の違いを刻め」",
-        "「封印がずれた。大小と記号を落ち着いて見ろ」",
+        stage8_miss_quotes,
+        (int)(sizeof(stage8_miss_quotes) / sizeof(stage8_miss_quotes[0])),
         stage8_words,
         (int)(sizeof(stage8_words) / sizeof(stage8_words[0])),
         "古文書の魔術師がページをめくり、大文字、数字、記号を重ねた封印を開いた。",
@@ -579,7 +637,8 @@ static const Stage stages[] = {
         "「数字は嘘をつかない。だが順番を誤れば道は消える」",
         "「順番は正された。数字の階段は頂上へ続く」",
         "「数字の階段を組み替える。順番を崩すな」",
-        "「数字の階段が揺れた。まとまりで見直せ」",
+        stage9_miss_quotes,
+        (int)(sizeof(stage9_miss_quotes) / sizeof(stage9_miss_quotes[0])),
         stage9_words,
         (int)(sizeof(stage9_words) / sizeof(stage9_words[0])),
         "数字の壁が座標を組み替え、数字と記号の長い列で階段を隠した。",
@@ -603,7 +662,8 @@ static const Stage stages[] = {
         "「すべてのキーを取り戻すなら、最後まで目を逸らすな」",
         "「最後まで目を逸らさなかったな。クムドールの剣は応えた」",
         "「すべてのキーを剣に重ねる。最後まで打ち切れ」",
-        "「剣筋が乱れた。課題全体を見て戻れ」",
+        stage10_miss_quotes,
+        (int)(sizeof(stage10_miss_quotes) / sizeof(stage10_miss_quotes[0])),
         stage10_words,
         (int)(sizeof(stage10_words) / sizeof(stage10_words[0])),
         "クムドールの試練が剣の形に光り、これまでのすべての打鍵を一息で求めてきた。",

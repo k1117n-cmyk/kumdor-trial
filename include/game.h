@@ -65,7 +65,8 @@ typedef struct {
     const char *enemy_quote;
     const char *defeat_quote;
     const char *climax_quote;
-    const char *miss_quote;
+    const char *const *miss_quotes;
+    int miss_quote_count;
     const char *const *words;
     int word_count;
     const char *climax_message;

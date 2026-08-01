@@ -34,6 +34,7 @@ static int read_input(char input[], int hide_echo);
 static int is_correct_input(const char input[], const char target[]);
 static void print_miss_hint(const char input[], const char target[]);
 static const char *choose_message(const char *const messages[], int message_count);
+static void print_stage_miss_quote(const Stage *stage);
 static EnemyIntent choose_enemy_intent(const Enemy *enemy, int is_climax);
 static void print_enemy_intent(EnemyIntent intent, const Enemy *enemy);
 static void apply_miss_blind(Player *player, int current_stage);
@@ -201,9 +202,7 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
         printf("%s➔ ミス！ 手元が狂った！（反撃を受ける！）%s\n",
                color(COLOR_RED),
                color(COLOR_RESET));
-        if (stage->miss_quote != NULL && stage->miss_quote[0] != '\0') {
-            printf("%s%s%s\n", color(COLOR_MAGENTA), stage->miss_quote, color(COLOR_RESET));
-        }
+        print_stage_miss_quote(stage);
         print_miss_hint(input, target);
         enemy_turn(player, enemy, intent);
         if (was_poisoned) {
@@ -394,6 +393,27 @@ static void print_miss_hint(const char input[], const char target[]) {
 
 static const char *choose_message(const char *const messages[], int message_count) {
     return messages[rand() % message_count];
+}
+
+static void print_stage_miss_quote(const Stage *stage) {
+    static const Stage *last_stage = NULL;
+    static int last_quote_index = -1;
+    int quote_index;
+
+    if (stage->miss_quotes == NULL || stage->miss_quote_count <= 0) {
+        return;
+    }
+
+    quote_index = rand() % stage->miss_quote_count;
+    if (stage->miss_quote_count > 1 &&
+        last_stage == stage &&
+        quote_index == last_quote_index) {
+        quote_index = (quote_index + 1 + rand() % (stage->miss_quote_count - 1)) % stage->miss_quote_count;
+    }
+
+    last_stage = stage;
+    last_quote_index = quote_index;
+    printf("%s%s%s\n", color(COLOR_MAGENTA), stage->miss_quotes[quote_index], color(COLOR_RESET));
 }
 
 static EnemyIntent choose_enemy_intent(const Enemy *enemy, int is_climax) {
