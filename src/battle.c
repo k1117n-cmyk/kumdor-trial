@@ -288,7 +288,7 @@ static int read_input(char input[], int hide_echo, int lock_edit) {
 #endif
 
     if (hide_echo) {
-        printf("課題を入力してEnter（暗闇: 入力は表示されません / 修正不可 / :helpでヘルプ）: ");
+        printf("[鍵] 課題を入力してEnter（暗闇: 入力は表示されません / 修正不可 / :helpでヘルプ）: ");
     } else {
         printf("課題を入力してEnter（:helpでヘルプ）: ");
     }
