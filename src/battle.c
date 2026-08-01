@@ -16,6 +16,7 @@
 #define COLOR_GREEN  "\033[32m"
 #define COLOR_YELLOW "\033[33m"
 #define COLOR_BLUE   "\033[34m"
+#define COLOR_MAGENTA "\033[35m"
 
 typedef enum {
     ENEMY_INTENT_NONE,
@@ -80,7 +81,7 @@ void print_battle_status(const Player *player, const Enemy *enemy) {
            enemy->max_hp);
 }
 
-int player_turn(Player *player, Enemy *enemy, const char target[], int current_stage, int stage_count, int is_climax) {
+int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char target[], int current_stage, int stage_count, int is_climax) {
     char input[INPUT_BUFFER_SIZE];
     EnemyIntent intent = choose_enemy_intent(enemy, is_climax);
 
@@ -190,6 +191,9 @@ int player_turn(Player *player, Enemy *enemy, const char target[], int current_s
         printf("%s➔ ミス！ 手元が狂った！（反撃を受ける！）%s\n",
                color(COLOR_RED),
                color(COLOR_RESET));
+        if (stage->miss_quote != NULL && stage->miss_quote[0] != '\0') {
+            printf("%s%s%s\n", color(COLOR_MAGENTA), stage->miss_quote, color(COLOR_RESET));
+        }
         print_miss_hint(input, target);
         enemy_turn(player, enemy, intent);
         apply_miss_blind(player, current_stage);

@@ -93,7 +93,7 @@ int run_game(void) {
             const char *target = choose_target(words, word_count);
 
             print_battle_status(&player, &enemy);
-            if (!player_turn(&player, &enemy, target, stage, stage_count, climax_started)) {
+            if (!player_turn(&player, &enemy, &stages[stage], target, stage, stage_count, climax_started)) {
                 quit_requested = 1;
             }
 
@@ -377,6 +377,9 @@ static void print_stage_climax(const Stage *stage) {
     }
 
     printf("\n%s【敵の殺気】%s%s\n", color(COLOR_YELLOW), color(COLOR_RESET), stage->climax_message);
+    if (stage->climax_quote != NULL && stage->climax_quote[0] != '\0') {
+        printf("%s%s%s\n", color(COLOR_MAGENTA), stage->climax_quote, color(COLOR_RESET));
+    }
     printf("空気が張りつめる。敵は反撃の機会を狙い、構えも鋭く変わった。\n");
 }
 
