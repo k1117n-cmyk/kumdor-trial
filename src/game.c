@@ -30,12 +30,15 @@ typedef struct {
 static void print_title(void);
 static void print_prologue(void);
 static int run_start_menu(void);
+static void print_how_to_play(void);
 static void run_prestage_menu(void);
 static int prompt_start_choice(void);
 static int prompt_prestage_choice(void);
 static void run_all_prestages(void);
-static void run_prestage(const PreStage *prestage, int prestage_number);
+static int run_prestage(const PreStage *prestage, int prestage_number);
 static void print_prestage_intro(const PreStage *prestage, int prestage_number);
+static void print_prestage_help(void);
+static void print_finger_key_map(void);
 static int read_line(char input[]);
 static void print_stage_transition(int next_stage_number, int stage_count);
 static void print_stage_intro(int stage_number, int stage_count, const Stage *stage);
@@ -81,6 +84,17 @@ static const char *const home_right_practice[] = {
     "j;h"
 };
 
+static const char *const home_both_practice[] = {
+    "asdf hjkl;",
+    "fdsa ;lkjh",
+    "a s d f j k l ;",
+    "ff jj",
+    "sad ask",
+    "fall flask",
+    "jkl; asdf",
+    "fj fj"
+};
+
 static const char *const top_left_practice[] = {
     "qwert",
     "trewq",
@@ -102,6 +116,17 @@ static const char *const top_right_practice[] = {
     "poi",
     "yip",
     "upup"
+};
+
+static const char *const top_both_practice[] = {
+    "qwert yuiop",
+    "trewq poiuy",
+    "q w e r t y u i o p",
+    "rr uu",
+    "qwe you",
+    "type",
+    "power quiet",
+    "qwerty"
 };
 
 static const char *const bottom_left_practice[] = {
@@ -126,6 +151,17 @@ static const char *const bottom_right_practice[] = {
     "n/m"
 };
 
+static const char *const bottom_both_practice[] = {
+    "zxcvb nm,./",
+    "bvcxz /.,mn",
+    "z x c v b n m , . /",
+    "vv nn",
+    "zxc m,.",
+    "vbn",
+    "mix.z",
+    "cave/m"
+};
+
 static const char *const number_left_practice[] = {
     "12345",
     "54321",
@@ -148,6 +184,17 @@ static const char *const number_right_practice[] = {
     "670"
 };
 
+static const char *const number_both_practice[] = {
+    "12345 67890",
+    "54321 09876",
+    "1 2 3 4 5 6 7 8 9 0",
+    "44 77",
+    "123 789",
+    "2024 808",
+    "405 670",
+    "515 9090"
+};
+
 static const PreStage prestages[] = {
     {
         "真ん中の列 左手",
@@ -168,6 +215,15 @@ static const PreStage prestages[] = {
         (int)(sizeof(home_right_practice) / sizeof(home_right_practice[0]))
     },
     {
+        "真ん中の列 両手",
+        "ホーム段を両手で覚える",
+        "a / s / d / f / g / h / j / k / l / ;",
+        "a小指 / s薬指 / d中指 / f,g人差し指 / h,j人差し指 / k中指 / l薬指 / ;小指",
+        "fとjを出発点にして、打ったあと両手をホーム段へ戻す。",
+        home_both_practice,
+        (int)(sizeof(home_both_practice) / sizeof(home_both_practice[0]))
+    },
+    {
         "上の列 左手",
         "上段の左手だけを覚える",
         "q / w / e / r / t",
@@ -184,6 +240,15 @@ static const PreStage prestages[] = {
         "右手ホーム段から上へ伸ばし、打ったあと戻す。",
         top_right_practice,
         (int)(sizeof(top_right_practice) / sizeof(top_right_practice[0]))
+    },
+    {
+        "上の列 両手",
+        "上段を両手で覚える",
+        "q / w / e / r / t / y / u / i / o / p",
+        "q小指 / w薬指 / e中指 / r,t人差し指 / y,u人差し指 / i中指 / o薬指 / p小指",
+        "ホーム段から上へ伸ばし、打ったあとfとjへ戻す。",
+        top_both_practice,
+        (int)(sizeof(top_both_practice) / sizeof(top_both_practice[0]))
     },
     {
         "下の列 左手",
@@ -204,6 +269,15 @@ static const PreStage prestages[] = {
         (int)(sizeof(bottom_right_practice) / sizeof(bottom_right_practice[0]))
     },
     {
+        "下の列 両手",
+        "下段を両手で覚える",
+        "z / x / c / v / b / n / m / , / . / /",
+        "z小指 / x薬指 / c中指 / v,b人差し指 / n人差し指 / m中指 / ,薬指 / .薬指 / /小指",
+        "両手を下へ下げ、打ったあとホーム段へ戻す。",
+        bottom_both_practice,
+        (int)(sizeof(bottom_both_practice) / sizeof(bottom_both_practice[0]))
+    },
+    {
         "数字 左手",
         "数字段の左手だけを覚える",
         "1 / 2 / 3 / 4 / 5",
@@ -220,6 +294,15 @@ static const PreStage prestages[] = {
         "数字を打ったら、右手をホーム段へ戻す。",
         number_right_practice,
         (int)(sizeof(number_right_practice) / sizeof(number_right_practice[0]))
+    },
+    {
+        "数字 両手",
+        "数字段を両手で覚える",
+        "1 / 2 / 3 / 4 / 5 / 6 / 7 / 8 / 9 / 0",
+        "1小指 / 2薬指 / 3中指 / 4,5人差し指 / 6,7人差し指 / 8中指 / 9薬指 / 0小指",
+        "数字を打ったら、両手をホーム段へ戻す。",
+        number_both_practice,
+        (int)(sizeof(number_both_practice) / sizeof(number_both_practice[0]))
     }
 };
 
@@ -346,6 +429,11 @@ static int run_start_menu(void) {
     while (1) {
         int choice = prompt_start_choice();
 
+        if (choice == 0) {
+            print_how_to_play();
+            continue;
+        }
+
         if (choice == 1) {
             return 1;
         }
@@ -355,7 +443,7 @@ static int run_start_menu(void) {
             continue;
         }
 
-        if (choice == 0) {
+        if (choice == -2) {
             return 0;
         }
 
@@ -367,26 +455,45 @@ static void run_prestage_menu(void) {
     int choice;
     int prestage_count = (int)(sizeof(prestages) / sizeof(prestages[0]));
 
+    start_random_prestage_bgm();
+
     printf("%s【プレステージ】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
     printf("本編の前に、キーと指の対応を短く練習できます。ミスしてもHPは減りません。\n");
     printf("Enterで全部練習、数字で個別練習、bで最初のメニューへ戻ります。\n");
+    print_finger_key_map();
 
     while (1) {
         choice = prompt_prestage_choice();
 
         if (choice == 0) {
             printf("最初のメニューへ戻ります。\n\n");
+            stop_bgm();
             return;
         }
 
         if (choice == -1) {
             run_all_prestages();
+            stop_bgm();
             return;
         }
 
+        if (choice == -2) {
+            print_prestage_help();
+            continue;
+        }
+
+        if (choice == -3) {
+            toggle_bgm();
+            continue;
+        }
+
         if (choice >= 1 && choice <= prestage_count) {
-            run_prestage(&prestages[choice - 1], choice);
-            printf("\nプレステージを終えました。最初のメニューへ戻ります。\n\n");
+            if (run_prestage(&prestages[choice - 1], choice)) {
+                printf("\nプレステージを終えました。最初のメニューへ戻ります。\n\n");
+            } else {
+                printf("\nプレステージを中断しました。最初のメニューへ戻ります。\n\n");
+            }
+            stop_bgm();
             return;
         }
 
@@ -394,10 +501,34 @@ static void run_prestage_menu(void) {
     }
 }
 
+static void print_how_to_play(void) {
+    char input[INPUT_BUFFER_SIZE];
+
+    printf("\n%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("%s【ゲームの遊び方】%s\n",
+           color(COLOR_YELLOW),
+           color(COLOR_RESET));
+    printf("表示された課題を、そのまま正確に入力してEnterを押します。\n");
+    printf("正解すると敵にダメージを与え、ミスすると敵の反撃を受けます。\n");
+    printf("大文字、小文字、スペース、記号はすべて区別します。\n");
+    printf("3回連続で正解すると追加の一撃が入ります。\n");
+    printf("敵HPを0にするとステージ突破、あなたのHPが0になると敗北です。\n");
+    printf("戦闘中は %s / %s / %s で中断やヘルプ表示ができます。\n",
+           SAVE_COMMAND,
+           QUIT_COMMAND,
+           HELP_COMMAND);
+    printf("指の位置に不安がある場合は、先にプレステージで練習できます。\n");
+    printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("Enterで最初のメニューへ戻る: ");
+    read_line(input);
+    printf("\n");
+}
+
 static int prompt_start_choice(void) {
     char input[INPUT_BUFFER_SIZE];
 
     printf("%s【最初のメニュー】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("0: ゲームの遊び方\n");
     printf("1: ゲームを始める\n");
     printf("2: プレステージで練習する\n");
     printf("q: 終了\n");
@@ -412,6 +543,10 @@ static int prompt_start_choice(void) {
         return 1;
     }
 
+    if (strcmp(input, "0") == 0) {
+        return 0;
+    }
+
     if (strcmp(input, "2") == 0) {
         return 2;
     }
@@ -419,7 +554,7 @@ static int prompt_start_choice(void) {
     if (strcmp(input, "q") == 0 ||
         strcmp(input, "Q") == 0 ||
         strcmp(input, QUIT_COMMAND) == 0) {
-        return 0;
+        return -2;
     }
 
     return -1;
@@ -428,9 +563,11 @@ static int prompt_start_choice(void) {
 static int prompt_prestage_choice(void) {
     char input[INPUT_BUFFER_SIZE];
     int prestage_count = (int)(sizeof(prestages) / sizeof(prestages[0]));
+    char *endptr;
+    long choice;
 
     printf("\n");
-    printf("Enter: 全部練習 / b: 最初のメニューへ戻る\n");
+    printf("Enter: 全部練習 / b: 最初のメニューへ戻る / :helpでヘルプ\n");
     for (int i = 0; i < prestage_count; i++) {
         printf("%d: %s\n", i + 1, prestages[i].name);
     }
@@ -445,6 +582,16 @@ static int prompt_prestage_choice(void) {
         return -1;
     }
 
+    if (strcmp(input, HELP_COMMAND) == 0 ||
+        strcmp(input, COMMANDS_COMMAND) == 0 ||
+        strcmp(input, SHORT_HELP_COMMAND) == 0) {
+        return -2;
+    }
+
+    if (strcmp(input, BGM_COMMAND) == 0 || strcmp(input, MUTE_COMMAND) == 0) {
+        return -3;
+    }
+
     if (strcmp(input, "b") == 0 ||
         strcmp(input, "B") == 0 ||
         strcmp(input, "back") == 0 ||
@@ -452,8 +599,12 @@ static int prompt_prestage_choice(void) {
         return 0;
     }
 
-    if (input[1] == '\0' && input[0] >= '1' && input[0] <= '9') {
-        return input[0] - '0';
+    choice = strtol(input, &endptr, 10);
+    if (input[0] != '\0' && *endptr == '\0') {
+        if (choice >= 1 && choice <= prestage_count) {
+            return (int)choice;
+        }
+        return prestage_count + 1;
     }
 
     return prestage_count + 1;
@@ -463,13 +614,16 @@ static void run_all_prestages(void) {
     int prestage_count = (int)(sizeof(prestages) / sizeof(prestages[0]));
 
     for (int i = 0; i < prestage_count; i++) {
-        run_prestage(&prestages[i], i + 1);
+        if (!run_prestage(&prestages[i], i + 1)) {
+            printf("\nプレステージを中断しました。最初のメニューへ戻ります。\n\n");
+            return;
+        }
     }
 
     printf("\nすべてのプレステージを終えました。最初のメニューへ戻ります。\n\n");
 }
 
-static void run_prestage(const PreStage *prestage, int prestage_number) {
+static int run_prestage(const PreStage *prestage, int prestage_number) {
     char input[INPUT_BUFFER_SIZE];
     int correct_count = 0;
     int miss_count = 0;
@@ -478,26 +632,42 @@ static void run_prestage(const PreStage *prestage, int prestage_number) {
 
     for (int i = 0; i < prestage->target_count; i++) {
         const char *target = prestage->targets[i];
+        int remaining_count = prestage->target_count - i;
 
         while (1) {
             printf("%s[練習 %d/%d]%s %s%s%s\n",
                    color(COLOR_YELLOW),
-                   i + 1,
+                   remaining_count,
                    prestage->target_count,
                    color(COLOR_RESET),
                    color(COLOR_YELLOW),
                    target,
                    color(COLOR_RESET));
-            printf("同じ文字を入力してEnter（q: この練習を終了）: ");
+            printf("同じ文字を入力してEnter（:q終了 / :helpでヘルプ）: ");
 
             if (!read_line(input)) {
                 printf("\n入力が途切れたため、この練習を終了します。\n");
-                return;
+                return 0;
             }
 
-            if (strcmp(input, "q") == 0 || strcmp(input, "Q") == 0) {
+            if (strcmp(input, ":q") == 0 ||
+                strcmp(input, ":Q") == 0 ||
+                strcmp(input, "q") == 0 ||
+                strcmp(input, "Q") == 0) {
                 printf("このプレステージを終了します。\n");
-                return;
+                return 0;
+            }
+
+            if (strcmp(input, HELP_COMMAND) == 0 ||
+                strcmp(input, COMMANDS_COMMAND) == 0 ||
+                strcmp(input, SHORT_HELP_COMMAND) == 0) {
+                print_prestage_help();
+                continue;
+            }
+
+            if (strcmp(input, BGM_COMMAND) == 0 || strcmp(input, MUTE_COMMAND) == 0) {
+                toggle_bgm();
+                continue;
             }
 
             if (strcmp(input, target) == 0) {
@@ -521,6 +691,7 @@ static void run_prestage(const PreStage *prestage, int prestage_number) {
            color(COLOR_RESET),
            correct_count,
            miss_count);
+    return 1;
 }
 
 static void print_prestage_intro(const PreStage *prestage, int prestage_number) {
@@ -534,7 +705,32 @@ static void print_prestage_intro(const PreStage *prestage, int prestage_number) 
     printf("今回のキー: %s\n", prestage->keys);
     printf("担当指  : %s\n", prestage->fingers);
     printf("指使い  : %s\n", prestage->tip);
+    print_finger_key_map();
     printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+}
+
+static void print_prestage_help(void) {
+    printf("\n%s【プレステージ ヘルプ】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("表示された練習課題を、そのまま正確に入力してEnterを押します。\n");
+    printf("ミスしてもHPは減らず、同じ課題をもう一度練習します。\n");
+    printf("練習カウントは残り数です。正解すると 8/8 から 7/8 のように減っていきます。\n");
+    printf("コマンド:\n");
+    printf("  %-10s このプレステージを終了して最初のメニューへ戻る\n", ":q");
+    printf("  %-10s このヘルプを表示\n", HELP_COMMAND);
+    printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n", BGM_COMMAND);
+    printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n\n", MUTE_COMMAND);
+}
+
+static void print_finger_key_map(void) {
+    printf("\n%s【指とキーの対応】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("指:  L5  L4  L3  L2  L2     R2  R2  R3  R4  R5\n");
+    printf("数:  [1] [2] [3] [4] [5]    [6] [7] [8] [9] [0]\n");
+    printf("上:  [q] [w] [e] [r] [t]    [y] [u] [i] [o] [p]\n");
+    printf("中:  [a] [s] [d] [f] [g]    [h] [j] [k] [l] [;]\n");
+    printf("下:  [z] [x] [c] [v] [b]    [n] [m] [,] [.] [/]\n");
+    printf("親指:                 [space]\n");
+    printf("目印: f=左人差し指の出発点 / j=右人差し指の出発点\n");
+    printf("凡例: L5左小指 L4左薬指 L3左中指 L2左人差し指 / R2右人差し指 R3右中指 R4右薬指 R5右小指\n");
 }
 
 static int read_line(char input[]) {
