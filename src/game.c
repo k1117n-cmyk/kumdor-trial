@@ -460,6 +460,7 @@ static void run_prestage_menu(void) {
     printf("%s【プレステージ】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
     printf("本編の前に、キーと指の対応を短く練習できます。ミスしてもHPは減りません。\n");
     printf("Enterで全部練習、数字で個別練習、bで最初のメニューへ戻ります。\n");
+    printf("メニュー中も :help / :bgm / :mute を使えます。\n");
     print_finger_key_map();
 
     while (1) {
@@ -567,7 +568,7 @@ static int prompt_prestage_choice(void) {
     long choice;
 
     printf("\n");
-    printf("Enter: 全部練習 / b: 最初のメニューへ戻る / :helpでヘルプ\n");
+    printf("Enter: 全部練習 / b: 戻る / :help: ヘルプ / :bgm: BGM切替\n");
     for (int i = 0; i < prestage_count; i++) {
         printf("%d: %s\n", i + 1, prestages[i].name);
     }
@@ -714,6 +715,7 @@ static void print_prestage_help(void) {
     printf("表示された練習課題を、そのまま正確に入力してEnterを押します。\n");
     printf("ミスしてもHPは減らず、同じ課題をもう一度練習します。\n");
     printf("練習カウントは残り数です。正解すると 8/8 から 7/8 のように減っていきます。\n");
+    printf("メニューではEnterで全部練習、数字で個別練習、bで最初のメニューへ戻ります。\n");
     printf("コマンド:\n");
     printf("  %-10s このプレステージを終了して最初のメニューへ戻る\n", ":q");
     printf("  %-10s このヘルプを表示\n", HELP_COMMAND);
