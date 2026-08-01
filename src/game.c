@@ -38,10 +38,10 @@ static void gain_exp(Player *player, int exp);
 static int prompt_next_stage(int next_stage_number, int stage_count);
 static const char *choose_target(const char *const words[], int word_count);
 static const char *color(const char *code);
+static void seed_random(void);
 
 int run_game(void) {
-    // 乱数の初期化
-    srand((unsigned int)time(NULL));
+    seed_random();
     atexit(cleanup_audio);
 
     Player player = create_player();
@@ -595,4 +595,10 @@ static const char *choose_target(const char *const words[], int word_count) {
 
 static const char *color(const char *code) {
     return getenv("NO_COLOR") == NULL ? code : "";
+}
+
+static void seed_random(void) {
+    unsigned int seed = (unsigned int)time(NULL) ^ (unsigned int)clock();
+
+    srand(seed);
 }
