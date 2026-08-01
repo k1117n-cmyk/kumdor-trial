@@ -92,7 +92,7 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
     print_enemy_intent(intent, enemy);
 
     if (player->status & STATUS_BLIND) {
-        printf("%s[課題]%s %s%s%s %s(暗闇: 入力は表示されない)%s\n",
+        printf("%s[課題]%s %s%s%s %s[鍵] 暗闇: 入力非表示・修正不可%s\n",
                color(COLOR_YELLOW),
                color(COLOR_RESET),
                color(COLOR_YELLOW),
