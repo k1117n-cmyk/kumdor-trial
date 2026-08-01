@@ -233,7 +233,7 @@ static const char *enemy_trait_name(EnemyTrait trait) {
 static const char *enemy_trait_description(EnemyTrait trait) {
     switch (trait) {
         case ENEMY_TRAIT_HEAVY_COUNTER:
-            return "敵が本気を出すと反撃ダメージが1増える";
+            return "敵が本気を出した後、予告された重撃の反撃ダメージが1増える";
         case ENEMY_TRAIT_POISON_EDGE:
             return "反撃時と敵が本気を出した後に一時的な毒を付与する";
         case ENEMY_TRAIT_BLIND_EDGE:
@@ -473,7 +473,7 @@ static void maybe_apply_climax_blind(Player *player, const Enemy *enemy, int is_
 static void enemy_turn(Player *player, Enemy *enemy, EnemyIntent intent) {
     int damage = enemy->attack;
 
-    if (enemy->trait == ENEMY_TRAIT_HEAVY_COUNTER && enemy->hp * 2 <= enemy->max_hp) {
+    if (intent == ENEMY_INTENT_HEAVY) {
         damage++;
     }
 
@@ -490,7 +490,7 @@ static void enemy_turn(Player *player, Enemy *enemy, EnemyIntent intent) {
            color(COLOR_RESET),
            player->hp);
 
-    if (enemy->trait == ENEMY_TRAIT_HEAVY_COUNTER && damage > enemy->attack) {
+    if (intent == ENEMY_INTENT_HEAVY) {
         printf("%s（敵の反撃が怒りを帯びて重くなっている！）%s\n",
                color(COLOR_YELLOW),
                color(COLOR_RESET));
