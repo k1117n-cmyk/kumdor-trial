@@ -98,7 +98,7 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
         char masked_target[MASKED_TARGET_BUFFER_SIZE];
 
         make_blind_target(target, masked_target, sizeof(masked_target));
-        printf("%s[課題]%s %s%s%s %s(暗闇: 一部が見えず、入力も表示されない)%s\n",
+        printf("%s[課題]%s %s%s%s %s(暗闇: 1文字が見えず、入力も表示されない)%s\n",
                color(COLOR_YELLOW),
                color(COLOR_RESET),
                color(COLOR_YELLOW),
@@ -258,7 +258,7 @@ static const char *enemy_trait_description(EnemyTrait trait) {
         case ENEMY_TRAIT_POISON_EDGE:
             return "反撃時と敵が本気を出した後に毒を付与し、失敗が続くと追加ダメージを与える";
         case ENEMY_TRAIT_BLIND_EDGE:
-            return "反撃時と敵が本気を出した後に暗闇を付与し、課題の一部を見えにくくする";
+            return "反撃時と敵が本気を出した後に暗闇を付与し、課題の1文字を見えにくくする";
         case ENEMY_TRAIT_REGEN_COUNTER:
             return "本気状態中の反撃時に自分のHPを1回復する";
         case ENEMY_TRAIT_STANDARD:
@@ -272,7 +272,7 @@ static void print_help(void) {
     printf("[課題] に表示された文字列を完全一致で入力すると攻撃します。大文字・小文字、スペース、記号も区別します。\n");
     printf("[状態] にはHP、状態異常、敵HPが表示されます。\n");
     printf("毒状態では、正解しても攻撃できず毒の解除に使われます。毒中に失敗が続くと追加ダメージを受けます。\n");
-    printf("暗闇状態では、課題の一部と入力中の文字が画面に表示されません。正解すると解除されます。\n");
+    printf("暗闇状態では、課題の1文字と入力中の文字が画面に表示されません。正解すると解除されます。\n");
     printf("タイプミスすると敵が反撃し、入力のずれに応じた短いヒントが出ます。\n");
     printf("3連続正解するたびに追加の一撃が入ります。\n");
     printf("コマンド入力はターンを消費しません。\n");
@@ -293,7 +293,7 @@ static int read_input(char input[], int hide_echo) {
 #endif
 
     if (hide_echo) {
-        printf("課題を入力してEnter（暗闇: 課題の一部と入力は表示されません / :helpでヘルプ）: ");
+        printf("課題を入力してEnter（暗闇: 課題の1文字と入力は表示されません / :helpでヘルプ）: ");
     } else {
         printf("課題を入力してEnter（:helpでヘルプ）: ");
     }
@@ -336,7 +336,8 @@ static int is_correct_input(const char input[], const char target[]) {
 
 static void make_blind_target(const char target[], char masked_target[], size_t masked_target_size) {
     size_t length = strlen(target);
-    int visible_count = 0;
+    size_t visible_positions[INPUT_BUFFER_SIZE];
+    size_t visible_position_count = 0;
 
     if (masked_target_size == 0) {
         return;
@@ -344,24 +345,18 @@ static void make_blind_target(const char target[], char masked_target[], size_t 
     masked_target[0] = '\0';
 
     for (size_t i = 0; i + 1 < masked_target_size && target[i] != '\0'; i++) {
-        if (target[i] == ' ') {
-            masked_target[i] = ' ';
-        } else if (rand() % 2 == 0) {
-            masked_target[i] = '?';
-        } else {
-            masked_target[i] = target[i];
-            visible_count++;
+        masked_target[i] = target[i];
+        if (target[i] != ' ' && visible_position_count < INPUT_BUFFER_SIZE) {
+            visible_positions[visible_position_count] = i;
+            visible_position_count++;
         }
         masked_target[i + 1] = '\0';
     }
 
-    if (visible_count == 0 && length > 0) {
-        for (size_t i = 0; masked_target[i] != '\0'; i++) {
-            if (target[i] != ' ') {
-                masked_target[i] = target[i];
-                break;
-            }
-        }
+    if (length > 2 && visible_position_count > 2) {
+        size_t hidden_position = visible_positions[rand() % visible_position_count];
+
+        masked_target[hidden_position] = '?';
     }
 }
 
