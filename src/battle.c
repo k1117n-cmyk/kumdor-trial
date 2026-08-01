@@ -37,6 +37,8 @@ static const char *choose_message(const char *const messages[], int message_coun
 static EnemyIntent choose_enemy_intent(const Enemy *enemy, int is_climax);
 static void print_enemy_intent(EnemyIntent intent, const Enemy *enemy);
 static void apply_miss_blind(Player *player, int current_stage);
+static void apply_poison(Player *player, const char message[]);
+static void tick_poison(Player *player);
 static void maybe_apply_climax_poison(Player *player, const Enemy *enemy, int is_climax);
 static void maybe_apply_climax_blind(Player *player, const Enemy *enemy, int is_climax);
 static void enemy_turn(Player *player, Enemy *enemy, EnemyIntent intent);
@@ -108,6 +110,8 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
     }
 
     if (!read_input(input, (player->status & STATUS_BLIND) != 0)) {
+        int was_poisoned = (player->status & STATUS_POISON) != 0;
+
         printf("%s➔ 入力が読み取れなかった！ 反撃を受ける！%s\n",
                color(COLOR_RED),
                color(COLOR_RESET));
@@ -115,6 +119,9 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
         player->stage_input_error_counts[current_stage]++;
         player->combo_count = 0;
         enemy_turn(player, enemy, intent);
+        if (was_poisoned) {
+            tick_poison(player);
+        }
         return 1;
     }
 
@@ -163,6 +170,7 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
                    color(COLOR_GREEN),
                    color(COLOR_RESET));
             player->status &= ~STATUS_POISON;
+            player->poison_turns_remaining = 0;
         } else {
             enemy->hp--;
             printf("%s➔ 見事なタイピング！ 剣が炸裂した！%s (敵の残りHP: %d)\n",
@@ -185,6 +193,8 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
             printf("%s（暗闇が晴れた！）%s\n", color(COLOR_GREEN), color(COLOR_RESET));
         }
     } else {
+        int was_poisoned = (player->status & STATUS_POISON) != 0;
+
         player->miss_count++;
         player->stage_miss_counts[current_stage]++;
         player->combo_count = 0;
@@ -196,6 +206,9 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
         }
         print_miss_hint(input, target);
         enemy_turn(player, enemy, intent);
+        if (was_poisoned) {
+            tick_poison(player);
+        }
         apply_miss_blind(player, current_stage);
     }
 
@@ -239,7 +252,7 @@ static const char *enemy_trait_description(EnemyTrait trait) {
         case ENEMY_TRAIT_HEAVY_COUNTER:
             return "敵が本気を出した後、予告された重撃の反撃ダメージが1増える";
         case ENEMY_TRAIT_POISON_EDGE:
-            return "反撃時と敵が本気を出した後に一時的な毒を付与する";
+            return "反撃時と敵が本気を出した後に毒を付与し、失敗が続くと追加ダメージを与える";
         case ENEMY_TRAIT_BLIND_EDGE:
             return "反撃時と敵が本気を出した後に一時的な暗闇を付与する";
         case ENEMY_TRAIT_REGEN_COUNTER:
@@ -254,7 +267,7 @@ static void print_help(void) {
     printf("\n%s【ヘルプ】%s\n", color(COLOR_BLUE), color(COLOR_RESET));
     printf("[課題] に表示された文字列を完全一致で入力すると攻撃します。大文字・小文字、スペース、記号も区別します。\n");
     printf("[状態] にはHP、状態異常、敵HPが表示されます。\n");
-    printf("毒状態では、正解しても攻撃できず毒の解除に使われます。\n");
+    printf("毒状態では、正解しても攻撃できず毒の解除に使われます。毒中に失敗が続くと追加ダメージを受けます。\n");
     printf("暗闇状態では、入力中の文字が画面に表示されません。正解すると解除されます。\n");
     printf("タイプミスすると敵が反撃し、入力のずれに応じた短いヒントが出ます。\n");
     printf("3連続正解するたびに追加の一撃が入ります。\n");
@@ -454,10 +467,7 @@ static void maybe_apply_climax_poison(Player *player, const Enemy *enemy, int is
         return;
     }
 
-    player->status |= STATUS_POISON;
-    printf("%s（敵の刃から毒霧が広がった！ 次の正解は毒の解除に使われる！）%s\n",
-           color(COLOR_YELLOW),
-           color(COLOR_RESET));
+    apply_poison(player, "敵の刃から毒霧が広がった！");
 }
 
 static void maybe_apply_climax_blind(Player *player, const Enemy *enemy, int is_climax) {
@@ -502,10 +512,7 @@ static void enemy_turn(Player *player, Enemy *enemy, EnemyIntent intent) {
 
     if ((enemy->trait == ENEMY_TRAIT_POISON_EDGE || intent == ENEMY_INTENT_POISON) &&
         !(player->status & STATUS_POISON)) {
-        player->status |= STATUS_POISON;
-        printf("%s（毒刃を受けた。次の正解は毒の解除に使われる！）%s\n",
-               color(COLOR_YELLOW),
-               color(COLOR_RESET));
+        apply_poison(player, "毒刃を受けた。");
     }
 
     if ((enemy->trait == ENEMY_TRAIT_BLIND_EDGE || intent == ENEMY_INTENT_BLIND) &&
@@ -527,6 +534,45 @@ static void enemy_turn(Player *player, Enemy *enemy, EnemyIntent intent) {
                enemy->max_hp,
                color(COLOR_RESET));
     }
+}
+
+static void apply_poison(Player *player, const char message[]) {
+    player->status |= STATUS_POISON;
+    player->poison_turns_remaining = POISON_TURN_LIMIT;
+    printf("%s（%s%d回以内に正解しないと毒が深く回る！）%s\n",
+           color(COLOR_YELLOW),
+           message,
+           player->poison_turns_remaining,
+           color(COLOR_RESET));
+}
+
+static void tick_poison(Player *player) {
+    if (player->hp <= 0 ||
+        !(player->status & STATUS_POISON) ||
+        player->poison_turns_remaining <= 0) {
+        return;
+    }
+
+    player->poison_turns_remaining--;
+
+    if (player->poison_turns_remaining > 0) {
+        printf("%s（毒が体に回る。あと%d回以内に正解して解除しろ！）%s\n",
+               color(COLOR_YELLOW),
+               player->poison_turns_remaining,
+               color(COLOR_RESET));
+        return;
+    }
+
+    player->hp--;
+    if (player->hp < 0) {
+        player->hp = 0;
+    }
+    player->poison_turns_remaining = POISON_TURN_LIMIT;
+    printf("%s（毒が深く回り、1ダメージを受けた！ 次の猶予: %d回）%s (あなたの残りHP: %d)\n",
+           color(COLOR_RED),
+           player->poison_turns_remaining,
+           color(COLOR_RESET),
+           player->hp);
 }
 
 static const char *color(const char *code) {

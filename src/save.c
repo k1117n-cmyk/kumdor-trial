@@ -143,6 +143,7 @@ int load_game(Player *player, int *start_stage, int stage_count) {
     }
 
     loaded_player.status = STATUS_NORMAL;
+    loaded_player.poison_turns_remaining = 0;
     *player = loaded_player;
     *start_stage = next_stage;
 

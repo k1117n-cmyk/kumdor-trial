@@ -160,6 +160,7 @@ Player create_player(void) {
     player.hp = 10;
     player.max_hp = 10;
     player.status = STATUS_NORMAL;
+    player.poison_turns_remaining = 0;
     player.level = 1;
 
     return player;
@@ -274,6 +275,7 @@ static void apply_rest_event(const Stage *stage, Player *player, int stage_index
 
     if (player->status != STATUS_NORMAL) {
         player->status = STATUS_NORMAL;
+        player->poison_turns_remaining = 0;
         printf("%s状態異常が消えた。指先の感覚が戻ってくる。%s\n",
                color(COLOR_GREEN),
                color(COLOR_RESET));
