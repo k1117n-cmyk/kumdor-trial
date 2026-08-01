@@ -543,7 +543,7 @@ static void print_enemy_intent(EnemyIntent intent, const Enemy *enemy) {
 }
 
 static void apply_miss_blind(Player *player, int current_stage) {
-    if (current_stage < 2 || (player->status & (STATUS_BLIND | STATUS_LOCKED))) {
+    if (current_stage < 3 || (player->status & (STATUS_BLIND | STATUS_LOCKED))) {
         return;
     }
 
