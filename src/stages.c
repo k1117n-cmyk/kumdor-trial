@@ -431,6 +431,170 @@ static const char *const stage14_climax_words[] = {
     "Final-Boss!"
 };
 
+static const char *const stage15_words[] = {
+    "!@#$%",
+    "^&*()",
+    "_+=",
+    "\\|][",
+    "}{{",
+    "\"':;?",
+    "!?OK",
+    "@@Gate",
+    "#1Boss",
+    "(OK?)",
+    "Shift+/",
+    "HP=10",
+    "Lv+1",
+    "Save?No",
+    "Type:OK!"
+};
+
+static const char *const stage15_climax_words[] = {
+    "! @ # $ %",
+    "^ & * ( )",
+    "_ += \\ |",
+    "][ }{",
+    "\" ' : ; ?",
+    "!?OK @@Gate",
+    "#1Boss (OK?)",
+    "Shift+/ Type:OK!"
+};
+
+static const char *const stage16_words[] = {
+    "Q1!",
+    "W2@",
+    "E3#",
+    "R4$",
+    "T5%",
+    "Y6^",
+    "U7&",
+    "I8*",
+    "O9(",
+    "P0)",
+    "QWERTY!",
+    "Type_20",
+    "Map+Key",
+    "Code=OK",
+    "Run|Stop"
+};
+
+static const char *const stage16_climax_words[] = {
+    "Q1! W2@",
+    "E3# R4$",
+    "T5% Y6^",
+    "U7& I8*",
+    "O9( P0)",
+    "QWERTY! Type_20",
+    "Map+Key Code=OK",
+    "Run|Stop"
+};
+
+static const char *const stage17_words[] = {
+    "asdf JKL;",
+    "zxcvb NM,./",
+    "Key[Map]",
+    "Gate{Open}",
+    "Path\\Root",
+    "Left|Right",
+    "Save:OK",
+    "Quote\"OK",
+    "It's OK",
+    "mix? yes!",
+    "HP[10]",
+    "Lv{20}",
+    "A_B+C",
+    "J;K:L"
+};
+
+static const char *const stage17_climax_words[] = {
+    "Key[Map] Gate{Open}",
+    "Path\\Root Left|Right",
+    "Save:OK Quote\"OK",
+    "It's OK mix? yes!",
+    "HP[10] Lv{20}",
+    "A_B+C J;K:L"
+};
+
+static const char *const stage18_words[] = {
+    "Kumdor_20",
+    "BGM=10",
+    "Stage[18]",
+    "Combo+3",
+    "No_Miss!",
+    "HP:10/10",
+    "Map{Q3}",
+    "Gate|Open",
+    "Shift+OK?",
+    "Code#405",
+    "A1! b2@",
+    "C3# d4$",
+    "E5% f6^",
+    "G7& h8*",
+    "I9( j0)"
+};
+
+static const char *const stage18_climax_words[] = {
+    "Kumdor_20 BGM=10",
+    "Stage[18] Combo+3",
+    "No_Miss! HP:10/10",
+    "Map{Q3} Gate|Open",
+    "Shift+OK? Code#405",
+    "A1! b2@ C3#"
+};
+
+static const char *const stage19_words[] = {
+    "!@# $%^",
+    "&*() _+=",
+    "\\| ][ }{",
+    "\"':; ?/",
+    "Qaz! WsX@",
+    "Edc# Rfv$",
+    "Tgb% Yhn^",
+    "Ujm& Ik,*",
+    "Ol.( P;?/",
+    "All_Keys+OK",
+    "Read{Then}Type",
+    "No[Look]?OK!"
+};
+
+static const char *const stage19_climax_words[] = {
+    "!@# $%^ &*()",
+    "_+= \\| ][ }{",
+    "\"':; ?/ OK",
+    "Qaz! WsX@ Edc#",
+    "Tgb% Yhn^ Ujm&",
+    "All_Keys+OK"
+};
+
+static const char *const stage20_words[] = {
+    "Kumdor_01!",
+    "Final@Gate",
+    "Sword#20",
+    "HP=10/10",
+    "Lv+1 OK?",
+    "QWERTY{ASDF}",
+    "ZXCV|NM,./",
+    "Code:405",
+    "Shift+_+=\\",
+    "Key[Map]{OK}",
+    "\"Final\"",
+    "It's:OK?",
+    "!@#$%^&*()",
+    "All_Keys? Yes!",
+    "Save?No_Run!"
+};
+
+static const char *const stage20_climax_words[] = {
+    "Kumdor_01! Final@Gate",
+    "Sword#20 HP=10/10",
+    "Lv+1 OK? QWERTY{ASDF}",
+    "ZXCV|NM,./ Code:405",
+    "Shift+_+=\\ Key[Map]{OK}",
+    "\"Final\" It's:OK?",
+    "!@#$%^&*()",
+    "All_Keys? Yes!"
+};
+
 static const char *const stage1_miss_quotes[] = {
     "「影が打鍵の乱れを拾ったぞ。落ち着いて構え直せ」",
     "「足元の影に合わせるな。課題の形を見ろ」"
@@ -497,6 +661,36 @@ static const char *const stage13_miss_quotes[] = {
 };
 
 static const char *const stage14_miss_quotes[] = {
+    "「剣筋が乱れた。大小と数字を分けて見ろ」",
+    "「総合の入口は逃げない。一息置いて打ち切れ」"
+};
+
+static const char *const stage15_miss_quotes[] = {
+    "「記号の列が崩れた。Shiftを押す指を先に決めろ」",
+    "「形だけを追うな。記号をひとつずつ読め」"
+};
+
+static const char *const stage16_miss_quotes[] = {
+    "「数字と記号がずれた。上段から数字段へ静かに伸ばせ」",
+    "「組み合わせに飲まれるな。まとまりで見直せ」"
+};
+
+static const char *const stage17_miss_quotes[] = {
+    "「括弧の門が閉じた。開きと閉じを見分けろ」",
+    "「引用符の影が跳ねた。課題全体を見てから打て」"
+};
+
+static const char *const stage18_miss_quotes[] = {
+    "「通信文が乱れた。記号と英字を分けて読め」",
+    "「長い課題ほど、最初の一打を静かに置け」"
+};
+
+static const char *const stage19_miss_quotes[] = {
+    "「全キーの嵐に流されるな。左から順に区切れ」",
+    "「記号の連なりは罠ではない。形を読めば道になる」"
+};
+
+static const char *const stage20_miss_quotes[] = {
     "「剣筋が乱れた。課題全体を見て戻れ」",
     "「最後の試練は逃げない。一息置いて打ち切れ」"
 };
@@ -828,25 +1022,175 @@ static const Stage stages[] = {
         0
     },
     {
-        {"クムドールの試練", 10, 10, 4, ENEMY_TRAIT_HEAVY_COUNTER},
+        {"総合の門番", 10, 10, 4, ENEMY_TRAIT_HEAVY_COUNTER},
         "通信塔最上階",
-        "塔の最上階で、抜け落ちたすべてのキーが剣の形に並ぶ。クムドールの試練は、これまで覚えたすべての打鍵を求めてきた。",
-        "最終練習: Shift記号と混合課題",
+        "塔の最上階へ続く門で、英字、数字、記号が剣の形に並ぶ。総合の門番は、これまで覚えた打鍵を混ぜて求めてきた。",
+        "総合練習: Shift記号と混合課題",
         "Shift / 大文字 / 数字 / 記号 / Space",
         "Shift、大文字、数字、記号、スペースを正確に切り替える。",
-        "「すべてのキーを取り戻すなら、最後まで目を逸らすな」",
-        "「最後まで目を逸らさなかったな。クムドールの剣は応えた」",
-        "「すべてのキーを剣に重ねる。最後まで打ち切れ」",
+        "「総合の門を抜けるなら、大小と記号から目を逸らすな」",
+        "「混ざった課題を見切ったな。全キーの試練へ進め」",
+        "「門の文字を重ねる。最後まで打ち切れ」",
         stage14_miss_quotes,
         (int)(sizeof(stage14_miss_quotes) / sizeof(stage14_miss_quotes[0])),
         stage14_words,
         (int)(sizeof(stage14_words) / sizeof(stage14_words[0])),
-        "クムドールの試練が剣の形に光り、これまでのすべての打鍵を一息で求めてきた。",
+        "総合の門番が剣の形に光り、英字、数字、記号を混ぜた課題を一息で求めてきた。",
         stage14_climax_words,
         (int)(sizeof(stage14_climax_words) / sizeof(stage14_climax_words[0])),
         "立喰いソバ",
-        10,
+        4,
+        7,
+        "総合の門が開き、すべてのキーを使う追加の試練が姿を見せた。ここから先は、記号も括弧も引用符もまとめて読み切らなければならない。",
+        "",
+        "",
+        0
+    },
+    {
+        {"記号列の番人", 10, 10, 4, ENEMY_TRAIT_POISON_EDGE},
+        "通信塔 記号回廊",
+        "壁一面にShift記号が刻まれた回廊で、記号列の番人が待っていた。数字段の上に隠れた記号を、順番どおりに呼び戻す試練だ。",
+        "全キー練習: Shift記号の基礎",
+        "! / @ / # / $ / % / ^ / & / * / ( / ) / _ / + / = / \\ / | / ] / [ / } / { / \" / ' / : / ; / ? / /",
+        "記号を見たら、必要なShiftと担当指を先に決めてから打つ。",
+        "「記号の姿を読め。形を見れば指は迷わない」",
+        "「記号列は整った。英字と数字を混ぜた道へ進め」",
+        "「記号を束ねる。ひとつでも形を落とすな」",
+        stage15_miss_quotes,
+        (int)(sizeof(stage15_miss_quotes) / sizeof(stage15_miss_quotes[0])),
+        stage15_words,
+        (int)(sizeof(stage15_words) / sizeof(stage15_words[0])),
+        "記号列の番人が壁の記号を一斉に光らせ、Shiftを押す指まで試してきた。",
+        stage15_climax_words,
+        (int)(sizeof(stage15_climax_words) / sizeof(stage15_climax_words[0])),
+        "記号せんべい",
+        4,
+        7,
+        "記号回廊の文字が整い、通信塔の奥へ続く鍵穴が開いた。次は英字と数字、記号を同時に読む必要がある。",
+        "記号回廊の床が少し温まり、指先の緊張がほどける。",
+        "次は英字と数字、Shift記号がまとまって出る。左から区切って読め。",
+        4
+    },
+    {
+        {"数字記号の調律師", 10, 10, 4, ENEMY_TRAIT_REGEN_COUNTER},
+        "通信塔 調律室",
+        "調律室では、数字とShift記号が同じ弦の上で震えている。数字記号の調律師は、上段と数字段の切り替えを試してきた。",
+        "全キー練習: 英字、数字、Shift記号",
+        "英字 / 数字 / ! @ # $ % ^ & * ( ) / _ + = / |",
+        "英字から数字段へ伸ばしても、打ったあとホームへ戻す。",
+        "「数字と記号を同じ弦で鳴らせ。急げば音は割れる」",
+        "「調律は済んだ。括弧と引用符の間を抜けろ」",
+        "「弦を張り替える。数字も記号も落とすな」",
+        stage16_miss_quotes,
+        (int)(sizeof(stage16_miss_quotes) / sizeof(stage16_miss_quotes[0])),
+        stage16_words,
+        (int)(sizeof(stage16_words) / sizeof(stage16_words[0])),
+        "数字記号の調律師が弦を鳴らし、数字とShift記号の組み合わせを重ねてきた。",
+        stage16_climax_words,
+        (int)(sizeof(stage16_climax_words) / sizeof(stage16_climax_words[0])),
+        "調律キャンディ",
+        4,
+        7,
+        "調律室の音がそろい、塔の壁に括弧と引用符の道が浮かび上がった。",
+        "",
+        "",
+        0
+    },
+    {
+        {"括弧の門番", 10, 10, 4, ENEMY_TRAIT_BLIND_EDGE},
+        "通信塔 括弧門",
+        "括弧門には、角括弧、波括弧、引用符が並んでいた。括弧の門番は、似た形の記号を見分ける力を求めてくる。",
+        "全キー練習: 括弧、引用符、区切り記号",
+        "[ / ] / { / } / \" / ' / : / ; / ? / / / \\ / |",
+        "開く記号と閉じる記号を見分け、引用符も課題どおりに打つ。",
+        "「門は左右で形が違う。開くか閉じるか、見てから打て」",
+        "「括弧門は開いた。長い通信文へ進め」",
+        "「門を閉じる。引用符まで読み切れ」",
+        stage17_miss_quotes,
+        (int)(sizeof(stage17_miss_quotes) / sizeof(stage17_miss_quotes[0])),
+        stage17_words,
+        (int)(sizeof(stage17_words) / sizeof(stage17_words[0])),
+        "括弧の門番が左右の門を入れ替え、括弧と引用符を混ぜてきた。",
+        stage17_climax_words,
+        (int)(sizeof(stage17_climax_words) / sizeof(stage17_climax_words[0])),
+        "括弧まんじゅう",
+        4,
         8,
+        "括弧門が開き、通信塔の中枢から長い入力文が流れ込み始めた。",
+        "",
+        "",
+        0
+    },
+    {
+        {"通信文の編纂者", 10, 10, 5, ENEMY_TRAIT_POISON_EDGE},
+        "通信塔 編纂室",
+        "編纂室では、英字、数字、記号が短い通信文に組み直されていた。通信文の編纂者は、まとまりごとの読解を試す。",
+        "全キー練習: 短い通信文",
+        "英字 / 数字 / 記号 / Space / Shift",
+        "長い課題は、記号やスペースで区切ってから打つ。",
+        "「文は一文字ずつでは遅い。まとまりを読め」",
+        "「通信文は整った。全キーの嵐へ進め」",
+        "「文を組み替える。区切りを見失うな」",
+        stage18_miss_quotes,
+        (int)(sizeof(stage18_miss_quotes) / sizeof(stage18_miss_quotes[0])),
+        stage18_words,
+        (int)(sizeof(stage18_words) / sizeof(stage18_words[0])),
+        "通信文の編纂者が文を組み替え、英字、数字、記号を続けて読ませてきた。",
+        stage18_climax_words,
+        (int)(sizeof(stage18_climax_words) / sizeof(stage18_climax_words[0])),
+        "編纂スープ",
+        5,
+        8,
+        "編纂室の文が整い、クムドールの剣を封じる最後の防壁が見えた。",
+        "編纂室の端末が静かに光り、休む指先へ温かな風を送った。",
+        "次は全キーの混合課題だ。最初に課題全体を見て、区切りごとに打て。",
+        5
+    },
+    {
+        {"全キーの嵐", 10, 10, 5, ENEMY_TRAIT_REGEN_COUNTER},
+        "通信塔 暴風層",
+        "暴風層では、すべてのキーが風のように流れていた。全キーの嵐は、左右、段、Shiftの切り替えをまとめて浴びせてくる。",
+        "全キー練習: 記号連続と左右混合",
+        "全英字 / 数字 / Shift記号 / 括弧 / 引用符 / Space",
+        "全体を一度見て、左から短いまとまりに分けて打つ。",
+        "「全キーの風を読め。追うな、区切れ」",
+        "「嵐を抜けたな。最後の試練へ進め」",
+        "「風を荒らす。すべてのキーを見失うな」",
+        stage19_miss_quotes,
+        (int)(sizeof(stage19_miss_quotes) / sizeof(stage19_miss_quotes[0])),
+        stage19_words,
+        (int)(sizeof(stage19_words) / sizeof(stage19_words[0])),
+        "全キーの嵐が塔を揺らし、記号と英字を一息で求めてきた。",
+        stage19_climax_words,
+        (int)(sizeof(stage19_climax_words) / sizeof(stage19_climax_words[0])),
+        "暴風ドリンク",
+        5,
+        8,
+        "暴風層が静まり、クムドールの剣を封じる最後の扉が開いた。",
+        "",
+        "",
+        0
+    },
+    {
+        {"クムドールの試練", 10, 10, 5, ENEMY_TRAIT_HEAVY_COUNTER},
+        "通信塔最上階",
+        "塔の最上階で、抜け落ちたすべてのキーが剣の形に並ぶ。クムドールの試練は、英字、数字、記号、スペースをすべて重ねて求めてきた。",
+        "最終練習: 全キー混合課題",
+        "全英字 / 数字 / ! @ # $ % ^ & * ( ) _ + = \\ | ] [ } { \" ' : ; ? / / Space",
+        "課題全体を見て、まとまりごとに正確に打ち切る。",
+        "「すべてのキーを取り戻すなら、最後まで目を逸らすな」",
+        "「最後まで目を逸らさなかったな。クムドールの剣は応えた」",
+        "「すべてのキーを剣に重ねる。最後まで打ち切れ」",
+        stage20_miss_quotes,
+        (int)(sizeof(stage20_miss_quotes) / sizeof(stage20_miss_quotes[0])),
+        stage20_words,
+        (int)(sizeof(stage20_words) / sizeof(stage20_words[0])),
+        "クムドールの試練が剣の形に光り、すべてのキーを一息で求めてきた。",
+        stage20_climax_words,
+        (int)(sizeof(stage20_climax_words) / sizeof(stage20_climax_words[0])),
+        "立喰いソバ",
+        10,
+        10,
         "剣はあなたの入力に応え、石化の呪文を一文字ずつ上書きしていく。抜け落ちていたキーはすべて元の場所へ戻り、塔の外で森がざわめき始めた。",
         "",
         "",

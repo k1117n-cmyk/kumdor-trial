@@ -38,6 +38,7 @@ static int is_bgm_file_name(const char *name);
 void start_stage_bgm(int stage_number) {
 #ifdef __APPLE__
     char bgm_path[64];
+    int bgm_stage_number = (stage_number - 1) % 10 + 1;
 
     current_stage_number = stage_number;
     current_bgm_context = BGM_CONTEXT_STAGE;
@@ -46,7 +47,7 @@ void start_stage_bgm(int stage_number) {
         return;
     }
 
-    snprintf(bgm_path, sizeof(bgm_path), "BGM/kumdor_%02d.wav", stage_number);
+    snprintf(bgm_path, sizeof(bgm_path), "BGM/kumdor_%02d.wav", bgm_stage_number);
     if (access(bgm_path, R_OK) != 0) {
         return;
     }

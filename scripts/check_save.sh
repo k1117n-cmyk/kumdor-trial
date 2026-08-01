@@ -57,6 +57,21 @@ v3_save='KUMDOR_SAVE_V3 0 10 10 0 4 1 0 1 1 0
 0 0 0 0
 0 0 0 0
 0 0 0 0'
+v4_save='KUMDOR_SAVE_V4 0 10 10 0 4 1 0 1 1 0
+4 1 0 4
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0'
 bad_header_save='KUMDOR_SAVE_X 0 10 10 0 0 0 0 1 1 0'
 complete_save='KUMDOR_SAVE_V3 10 10 10 0 10 0 0 10 2 0
 10 0 0 10
@@ -73,6 +88,7 @@ complete_save='KUMDOR_SAVE_V3 10 10 10 0 10 0 0 10 2 0
 run_case "v1" "$v1_save" "記録の石板を読み込んだ"
 run_case "v2" "$v2_save" "記録の石板を読み込んだ"
 run_case "v3" "$v3_save" "記録の石板を読み込んだ"
+run_case "v4" "$v4_save" "記録の石板を読み込んだ"
 run_case "bad-header" "$bad_header_save" "記録の刻印が読み取れません" 'y
 1
 :savequit'
@@ -80,10 +96,10 @@ run_case "complete" "$complete_save" "完全勝利の証が刻まれています
 1
 :savequit'
 
-v4_case_dir="$TMP_DIR/save-v4"
-mkdir -p "$v4_case_dir"
-output=$(cd "$v4_case_dir" && printf '1\n:savequit\n' | KUMDOR_NO_BGM=1 "$GAME")
+v5_case_dir="$TMP_DIR/save-v5"
+mkdir -p "$v5_case_dir"
+output=$(cd "$v5_case_dir" && printf '1\n:savequit\n' | KUMDOR_NO_BGM=1 "$GAME")
 printf '%s' "$output" | grep -q "記録を刻んだ。ここで剣を収める。"
-head -n 1 "$v4_case_dir/kumdor_save.txt" | grep -q '^KUMDOR_SAVE_V4 '
+head -n 1 "$v5_case_dir/kumdor_save.txt" | grep -q '^KUMDOR_SAVE_V5 '
 
 echo "save checks passed"

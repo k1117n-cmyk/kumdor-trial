@@ -12,8 +12,10 @@
 #define SAVE_FORMAT_HEADER_V2 "KUMDOR_SAVE_V2"
 #define SAVE_FORMAT_HEADER_V3 "KUMDOR_SAVE_V3"
 #define SAVE_FORMAT_HEADER_V4 "KUMDOR_SAVE_V4"
-#define SAVE_FORMAT_HEADER SAVE_FORMAT_HEADER_V4
+#define SAVE_FORMAT_HEADER_V5 "KUMDOR_SAVE_V5"
+#define SAVE_FORMAT_HEADER SAVE_FORMAT_HEADER_V5
 #define LEGACY_STAGE_COUNT 10
+#define SAVE_FORMAT_V4_STAGE_COUNT 14
 #define VALID_STATUS_MASK (STATUS_POISON | STATUS_BLIND | STATUS_LOCKED)
 #define COLOR_RESET "\033[0m"
 #define COLOR_BLUE  "\033[34m"
@@ -77,8 +79,22 @@ int load_game(Player *player, int *start_stage, int stage_count) {
         return 0;
     }
 
-    if (strcmp(header, SAVE_FORMAT_HEADER_V4) == 0) {
+    if (strcmp(header, SAVE_FORMAT_HEADER_V5) == 0) {
         saved_stage_count = MAX_STAGE_COUNT;
+        for (int stage = 0; stage < saved_stage_count; stage++) {
+            if (fscanf(file,
+                       "%d %d %d %d",
+                       &loaded_player.stage_correct_counts[stage],
+                       &loaded_player.stage_miss_counts[stage],
+                       &loaded_player.stage_input_error_counts[stage],
+                       &loaded_player.stage_max_combo_counts[stage]) != 4) {
+                fclose(file);
+                printf("記録の石板を読み取れませんでした。新たに試練へ向かいます。\n");
+                return 0;
+            }
+        }
+    } else if (strcmp(header, SAVE_FORMAT_HEADER_V4) == 0) {
+        saved_stage_count = SAVE_FORMAT_V4_STAGE_COUNT;
         for (int stage = 0; stage < saved_stage_count; stage++) {
             if (fscanf(file,
                        "%d %d %d %d",
