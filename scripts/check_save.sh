@@ -14,6 +14,8 @@ run_case() {
     name=$1
     input=$2
     expected=$3
+    play_input=${4:-'y
+:savequit'}
 
     case_dir="$TMP_DIR/$name"
     mkdir -p "$case_dir"
@@ -22,7 +24,7 @@ run_case() {
         printf '%s\n' "$input" > "$case_dir/kumdor_save.txt"
     fi
 
-    output=$(cd "$case_dir" && printf 'y\n:savequit\n' | KUMDOR_NO_BGM=1 "$GAME")
+    output=$(cd "$case_dir" && printf '%s\n' "$play_input" | KUMDOR_NO_BGM=1 "$GAME")
 
     printf '%s' "$output" | grep -q "$expected"
 }
@@ -71,12 +73,16 @@ complete_save='KUMDOR_SAVE_V3 10 10 10 0 10 0 0 10 2 0
 run_case "v1" "$v1_save" "記録の石板を読み込んだ"
 run_case "v2" "$v2_save" "記録の石板を読み込んだ"
 run_case "v3" "$v3_save" "記録の石板を読み込んだ"
-run_case "bad-header" "$bad_header_save" "記録の刻印が読み取れません"
-run_case "complete" "$complete_save" "完全勝利の証が刻まれています"
+run_case "bad-header" "$bad_header_save" "記録の刻印が読み取れません" 'y
+1
+:savequit'
+run_case "complete" "$complete_save" "完全勝利の証が刻まれています" 'y
+1
+:savequit'
 
 v3_case_dir="$TMP_DIR/save-v3"
 mkdir -p "$v3_case_dir"
-output=$(cd "$v3_case_dir" && printf ':savequit\n' | KUMDOR_NO_BGM=1 "$GAME")
+output=$(cd "$v3_case_dir" && printf '1\n:savequit\n' | KUMDOR_NO_BGM=1 "$GAME")
 printf '%s' "$output" | grep -q "記録を刻んだ。ここで剣を収める。"
 head -n 1 "$v3_case_dir/kumdor_save.txt" | grep -q '^KUMDOR_SAVE_V3 '
 

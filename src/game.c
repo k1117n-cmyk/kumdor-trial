@@ -16,8 +16,27 @@
 #define COLOR_MAGENTA "\033[35m"
 #define COLOR_CYAN    "\033[36m"
 #define COLOR_BOLD    "\033[1m"
+
+typedef struct {
+    const char *name;
+    const char *lesson;
+    const char *keys;
+    const char *fingers;
+    const char *tip;
+    const char *const *targets;
+    int target_count;
+} PreStage;
+
 static void print_title(void);
 static void print_prologue(void);
+static int run_start_menu(void);
+static void run_prestage_menu(void);
+static int prompt_start_choice(void);
+static int prompt_prestage_choice(void);
+static void run_all_prestages(void);
+static void run_prestage(const PreStage *prestage, int prestage_number);
+static void print_prestage_intro(const PreStage *prestage, int prestage_number);
+static int read_line(char input[]);
 static void print_stage_transition(int next_stage_number, int stage_count);
 static void print_stage_intro(int stage_number, int stage_count, const Stage *stage);
 static void print_stage_clear(int stage_number, const Stage *stage, Player *player);
@@ -40,6 +59,170 @@ static const char *choose_target(const char *const words[], int word_count);
 static const char *color(const char *code);
 static void seed_random(void);
 
+static const char *const home_left_practice[] = {
+    "asdfg",
+    "gfdsa",
+    "a s d f g",
+    "ff gg",
+    "sad",
+    "fad",
+    "adds",
+    "gas"
+};
+
+static const char *const home_right_practice[] = {
+    "hjkl;",
+    ";lkjh",
+    "h j k l ;",
+    "hh jj",
+    "jkl;",
+    "hjj",
+    "kkll",
+    "j;h"
+};
+
+static const char *const top_left_practice[] = {
+    "qwert",
+    "trewq",
+    "q w e r t",
+    "rr tt",
+    "qwe",
+    "were",
+    "tree",
+    "tweet"
+};
+
+static const char *const top_right_practice[] = {
+    "yuiop",
+    "poiuy",
+    "y u i o p",
+    "yy uu",
+    "you",
+    "pop",
+    "poi",
+    "yip",
+    "upup"
+};
+
+static const char *const bottom_left_practice[] = {
+    "zxcvb",
+    "bvcxz",
+    "z x c v b",
+    "vv bb",
+    "zxc",
+    "zcv",
+    "bvc",
+    "zz bb"
+};
+
+static const char *const bottom_right_practice[] = {
+    "nm,./",
+    "/.,mn",
+    "n m , . /",
+    "nn mm",
+    "m,.",
+    "nmn",
+    "m,m",
+    "n/m"
+};
+
+static const char *const number_left_practice[] = {
+    "12345",
+    "54321",
+    "1 2 3 4 5",
+    "44 55",
+    "123",
+    "2024",
+    "405",
+    "515"
+};
+
+static const char *const number_right_practice[] = {
+    "67890",
+    "09876",
+    "6 7 8 9 0",
+    "66 77",
+    "789",
+    "9090",
+    "808",
+    "670"
+};
+
+static const PreStage prestages[] = {
+    {
+        "真ん中の列 左手",
+        "ホーム段の左手だけを覚える",
+        "a / s / d / f / g",
+        "a小指 / s薬指 / d中指 / f人差し指 / g人差し指",
+        "fの突起を出発点にして、左手だけで打つ。",
+        home_left_practice,
+        (int)(sizeof(home_left_practice) / sizeof(home_left_practice[0]))
+    },
+    {
+        "真ん中の列 右手",
+        "ホーム段の右手だけを覚える",
+        "h / j / k / l / ;",
+        "h人差し指 / j人差し指 / k中指 / l薬指 / ;小指",
+        "jの突起を出発点にして、右手だけで打つ。",
+        home_right_practice,
+        (int)(sizeof(home_right_practice) / sizeof(home_right_practice[0]))
+    },
+    {
+        "上の列 左手",
+        "上段の左手だけを覚える",
+        "q / w / e / r / t",
+        "q小指 / w薬指 / e中指 / r人差し指 / t人差し指",
+        "左手ホーム段から上へ伸ばし、打ったあと戻す。",
+        top_left_practice,
+        (int)(sizeof(top_left_practice) / sizeof(top_left_practice[0]))
+    },
+    {
+        "上の列 右手",
+        "上段の右手だけを覚える",
+        "y / u / i / o / p",
+        "y人差し指 / u人差し指 / i中指 / o薬指 / p小指",
+        "右手ホーム段から上へ伸ばし、打ったあと戻す。",
+        top_right_practice,
+        (int)(sizeof(top_right_practice) / sizeof(top_right_practice[0]))
+    },
+    {
+        "下の列 左手",
+        "下段の左手だけを覚える",
+        "z / x / c / v / b",
+        "z小指 / x薬指 / c中指 / v人差し指 / b人差し指",
+        "左手だけを下へ下げ、打ったあとホーム段へ戻す。",
+        bottom_left_practice,
+        (int)(sizeof(bottom_left_practice) / sizeof(bottom_left_practice[0]))
+    },
+    {
+        "下の列 右手",
+        "下段の右手だけを覚える",
+        "n / m / , / . / /",
+        "n人差し指 / m中指 / ,薬指 / .薬指 / /小指",
+        "右手だけを下へ下げ、打ったあとホーム段へ戻す。",
+        bottom_right_practice,
+        (int)(sizeof(bottom_right_practice) / sizeof(bottom_right_practice[0]))
+    },
+    {
+        "数字 左手",
+        "数字段の左手だけを覚える",
+        "1 / 2 / 3 / 4 / 5",
+        "1小指 / 2薬指 / 3中指 / 4人差し指 / 5人差し指",
+        "数字を打ったら、左手をホーム段へ戻す。",
+        number_left_practice,
+        (int)(sizeof(number_left_practice) / sizeof(number_left_practice[0]))
+    },
+    {
+        "数字 右手",
+        "数字段の右手だけを覚える",
+        "6 / 7 / 8 / 9 / 0",
+        "6人差し指 / 7人差し指 / 8中指 / 9薬指 / 0小指",
+        "数字を打ったら、右手をホーム段へ戻す。",
+        number_right_practice,
+        (int)(sizeof(number_right_practice) / sizeof(number_right_practice[0]))
+    }
+};
+
 int run_game(void) {
     seed_random();
     atexit(cleanup_audio);
@@ -57,6 +240,12 @@ int run_game(void) {
 
     print_title();
     if (!load_game(&player, &start_stage, stage_count)) {
+        if (!run_start_menu()) {
+            printf("\n%s【終了】%sクムドールの試練を始めずに終了しました。\n",
+                   color(COLOR_BLUE),
+                   color(COLOR_RESET));
+            return 0;
+        }
         print_prologue();
     }
 
@@ -151,6 +340,210 @@ static void print_prologue(void) {
     printf("しかし着陸直前、船の計器は意味のない文字列を吐き出し、空から墜ちた。\n");
     printf("失ったキー、散らばったスパイス、残ったライフはひとつ。\n");
     printf("それでも、指はまだホームポジションを覚えている。\n\n");
+}
+
+static int run_start_menu(void) {
+    while (1) {
+        int choice = prompt_start_choice();
+
+        if (choice == 1) {
+            return 1;
+        }
+
+        if (choice == 2) {
+            run_prestage_menu();
+            continue;
+        }
+
+        if (choice == 0) {
+            return 0;
+        }
+
+        printf("選択できる番号を入力してください。\n");
+    }
+}
+
+static void run_prestage_menu(void) {
+    int choice;
+    int prestage_count = (int)(sizeof(prestages) / sizeof(prestages[0]));
+
+    printf("%s【プレステージ】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("本編の前に、キーと指の対応を短く練習できます。ミスしてもHPは減りません。\n");
+    printf("Enterで全部練習、数字で個別練習、bで最初のメニューへ戻ります。\n");
+
+    while (1) {
+        choice = prompt_prestage_choice();
+
+        if (choice == 0) {
+            printf("最初のメニューへ戻ります。\n\n");
+            return;
+        }
+
+        if (choice == -1) {
+            run_all_prestages();
+            return;
+        }
+
+        if (choice >= 1 && choice <= prestage_count) {
+            run_prestage(&prestages[choice - 1], choice);
+            printf("\nプレステージを終えました。最初のメニューへ戻ります。\n\n");
+            return;
+        }
+
+        printf("選択できる番号を入力してください。\n");
+    }
+}
+
+static int prompt_start_choice(void) {
+    char input[INPUT_BUFFER_SIZE];
+
+    printf("%s【最初のメニュー】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("1: ゲームを始める\n");
+    printf("2: プレステージで練習する\n");
+    printf("q: 終了\n");
+    printf("選択: ");
+
+    if (!read_line(input)) {
+        printf("\n入力が途切れたため、終了します。\n");
+        return 0;
+    }
+
+    if (input[0] == '\0' || strcmp(input, "1") == 0) {
+        return 1;
+    }
+
+    if (strcmp(input, "2") == 0) {
+        return 2;
+    }
+
+    if (strcmp(input, "q") == 0 ||
+        strcmp(input, "Q") == 0 ||
+        strcmp(input, QUIT_COMMAND) == 0) {
+        return 0;
+    }
+
+    return -1;
+}
+
+static int prompt_prestage_choice(void) {
+    char input[INPUT_BUFFER_SIZE];
+    int prestage_count = (int)(sizeof(prestages) / sizeof(prestages[0]));
+
+    printf("\n");
+    printf("Enter: 全部練習 / b: 最初のメニューへ戻る\n");
+    for (int i = 0; i < prestage_count; i++) {
+        printf("%d: %s\n", i + 1, prestages[i].name);
+    }
+    printf("選択: ");
+
+    if (!read_line(input)) {
+        printf("\n入力が途切れたため、最初のメニューへ戻ります。\n");
+        return 0;
+    }
+
+    if (input[0] == '\0') {
+        return -1;
+    }
+
+    if (strcmp(input, "b") == 0 ||
+        strcmp(input, "B") == 0 ||
+        strcmp(input, "back") == 0 ||
+        strcmp(input, "BACK") == 0) {
+        return 0;
+    }
+
+    if (input[1] == '\0' && input[0] >= '1' && input[0] <= '9') {
+        return input[0] - '0';
+    }
+
+    return prestage_count + 1;
+}
+
+static void run_all_prestages(void) {
+    int prestage_count = (int)(sizeof(prestages) / sizeof(prestages[0]));
+
+    for (int i = 0; i < prestage_count; i++) {
+        run_prestage(&prestages[i], i + 1);
+    }
+
+    printf("\nすべてのプレステージを終えました。最初のメニューへ戻ります。\n\n");
+}
+
+static void run_prestage(const PreStage *prestage, int prestage_number) {
+    char input[INPUT_BUFFER_SIZE];
+    int correct_count = 0;
+    int miss_count = 0;
+
+    print_prestage_intro(prestage, prestage_number);
+
+    for (int i = 0; i < prestage->target_count; i++) {
+        const char *target = prestage->targets[i];
+
+        while (1) {
+            printf("%s[練習 %d/%d]%s %s%s%s\n",
+                   color(COLOR_YELLOW),
+                   i + 1,
+                   prestage->target_count,
+                   color(COLOR_RESET),
+                   color(COLOR_YELLOW),
+                   target,
+                   color(COLOR_RESET));
+            printf("同じ文字を入力してEnter（q: この練習を終了）: ");
+
+            if (!read_line(input)) {
+                printf("\n入力が途切れたため、この練習を終了します。\n");
+                return;
+            }
+
+            if (strcmp(input, "q") == 0 || strcmp(input, "Q") == 0) {
+                printf("このプレステージを終了します。\n");
+                return;
+            }
+
+            if (strcmp(input, target) == 0) {
+                correct_count++;
+                printf("%sOK%s 指の位置を保ったまま次へ進みます。\n",
+                       color(COLOR_GREEN),
+                       color(COLOR_RESET));
+                break;
+            }
+
+            miss_count++;
+            printf("%sもう一度。%s 目で課題を確認して、ゆっくり同じ順番で打ちます。\n",
+                   color(COLOR_RED),
+                   color(COLOR_RESET));
+        }
+    }
+
+    printf("%s【%s 完了】%s 正解 %d / やり直し %d\n",
+           color(COLOR_GREEN),
+           prestage->name,
+           color(COLOR_RESET),
+           correct_count,
+           miss_count);
+}
+
+static void print_prestage_intro(const PreStage *prestage, int prestage_number) {
+    printf("\n%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("%s【プレステージ%d: %s】%s\n",
+           color(COLOR_YELLOW),
+           prestage_number,
+           prestage->name,
+           color(COLOR_RESET));
+    printf("練習内容: %s\n", prestage->lesson);
+    printf("今回のキー: %s\n", prestage->keys);
+    printf("担当指  : %s\n", prestage->fingers);
+    printf("指使い  : %s\n", prestage->tip);
+    printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+}
+
+static int read_line(char input[]) {
+    if (fgets(input, INPUT_BUFFER_SIZE, stdin) == NULL) {
+        return 0;
+    }
+
+    input[strcspn(input, "\n")] = '\0';
+    return 1;
 }
 
 Player create_player(void) {
