@@ -11,7 +11,9 @@
 #define SAVE_FORMAT_HEADER_V1 "KUMDOR_SAVE_V1"
 #define SAVE_FORMAT_HEADER_V2 "KUMDOR_SAVE_V2"
 #define SAVE_FORMAT_HEADER_V3 "KUMDOR_SAVE_V3"
-#define SAVE_FORMAT_HEADER SAVE_FORMAT_HEADER_V3
+#define SAVE_FORMAT_HEADER_V4 "KUMDOR_SAVE_V4"
+#define SAVE_FORMAT_HEADER SAVE_FORMAT_HEADER_V4
+#define LEGACY_STAGE_COUNT 10
 #define VALID_STATUS_MASK (STATUS_POISON | STATUS_BLIND | STATUS_LOCKED)
 #define COLOR_RESET "\033[0m"
 #define COLOR_BLUE  "\033[34m"
@@ -23,6 +25,7 @@ int load_game(Player *player, int *start_stage, int stage_count) {
     char answer[INPUT_BUFFER_SIZE];
     char header[INPUT_BUFFER_SIZE];
     int next_stage;
+    int saved_stage_count = 0;
     int loaded_status;
     Player loaded_player = create_player();
 
@@ -74,8 +77,23 @@ int load_game(Player *player, int *start_stage, int stage_count) {
         return 0;
     }
 
-    if (strcmp(header, SAVE_FORMAT_HEADER_V3) == 0) {
-        for (int stage = 0; stage < MAX_STAGE_COUNT; stage++) {
+    if (strcmp(header, SAVE_FORMAT_HEADER_V4) == 0) {
+        saved_stage_count = MAX_STAGE_COUNT;
+        for (int stage = 0; stage < saved_stage_count; stage++) {
+            if (fscanf(file,
+                       "%d %d %d %d",
+                       &loaded_player.stage_correct_counts[stage],
+                       &loaded_player.stage_miss_counts[stage],
+                       &loaded_player.stage_input_error_counts[stage],
+                       &loaded_player.stage_max_combo_counts[stage]) != 4) {
+                fclose(file);
+                printf("記録の石板を読み取れませんでした。新たに試練へ向かいます。\n");
+                return 0;
+            }
+        }
+    } else if (strcmp(header, SAVE_FORMAT_HEADER_V3) == 0) {
+        saved_stage_count = LEGACY_STAGE_COUNT;
+        for (int stage = 0; stage < saved_stage_count; stage++) {
             if (fscanf(file,
                        "%d %d %d %d",
                        &loaded_player.stage_correct_counts[stage],
@@ -88,7 +106,8 @@ int load_game(Player *player, int *start_stage, int stage_count) {
             }
         }
     } else if (strcmp(header, SAVE_FORMAT_HEADER_V2) == 0) {
-        for (int stage = 0; stage < MAX_STAGE_COUNT; stage++) {
+        saved_stage_count = LEGACY_STAGE_COUNT;
+        for (int stage = 0; stage < saved_stage_count; stage++) {
             if (fscanf(file,
                        "%d %d %d",
                        &loaded_player.stage_correct_counts[stage],
@@ -99,7 +118,9 @@ int load_game(Player *player, int *start_stage, int stage_count) {
                 return 0;
             }
         }
-    } else if (strcmp(header, SAVE_FORMAT_HEADER_V1) != 0) {
+    } else if (strcmp(header, SAVE_FORMAT_HEADER_V1) == 0) {
+        saved_stage_count = LEGACY_STAGE_COUNT;
+    } else {
         fclose(file);
         printf("記録の刻印が読み取れません。新たに試練へ向かいます。\n");
         return 0;
@@ -137,7 +158,7 @@ int load_game(Player *player, int *start_stage, int stage_count) {
         }
     }
 
-    if (next_stage >= stage_count) {
+    if (next_stage >= saved_stage_count) {
         printf("完全勝利の証が刻まれています。新たな試練として始めます。\n");
         return 0;
     }

@@ -69,181 +69,301 @@ static const char *const stage3_words[] = {
     "lj",
     "jkl;",
     ";lkj",
-    "all",
-    "fall",
-    "flak",
-    "ask",
     "j k",
+    "jj kk",
+    "ll ;;",
     "jkl; j",
-    "fall ask",
-    "all;all",
     "j;k;l",
-    "flask",
     "j;kj",
-    ";ljk"
+    ";ljk",
+    "kl;",
+    "jlj",
+    "kkl"
 };
 
 static const char *const stage3_climax_words[] = {
     "jkl; ;lkj",
     "j; k; l;",
-    "all; fall",
-    "fall ask;",
+    "jj kk ll",
     "j k l ;",
     ";lkj jkl;",
-    "flask; all",
     "j;kj ;ljk",
-    "all;all ask",
-    "jkl; fall"
+    "kl; jlj",
+    "jkl; j;"
 };
 
 static const char *const stage4_words[] = {
-    "fr",
-    "ju",
-    "rty",
-    "rtyu",
-    "try",
-    "turf",
-    "trust",
-    "fury",
-    "truth",
-    "retry",
-    "rusty",
-    "try turf",
-    "fury rut",
-    "rtyu fr",
-    "trusty"
+    "asdf jkl;",
+    "fdsa ;lkj",
+    "a s d f j k l ;",
+    "ff jj",
+    "sad ask",
+    "fall flask",
+    "jkl; asdf",
+    "fj fj",
+    "all ask",
+    "sad fall",
+    "flask",
+    "as jkl;",
+    "fall; ask"
 };
 
 static const char *const stage4_climax_words[] = {
-    "try fury",
-    "truth retry",
-    "rtyu fr",
-    "try turf",
-    "fury rut",
-    "trusty truth",
-    "retry rtyu",
-    "turf fury",
-    "rtyu try",
-    "truth turf"
+    "asdf fdsa",
+    "jkl; ;lkj",
+    "sad ask fall",
+    "ff jj fj",
+    "fall flask",
+    "all; ask",
+    "jkl; asdf",
+    "fj jf fj",
+    "sad fall ask"
 };
 
 static const char *const stage5_words[] = {
     "qwe",
-    "iop",
+    "qwert",
+    "trewq",
+    "q w e r t",
+    "rr tt",
+    "qwe",
+    "were",
+    "tree",
+    "tweet",
+    "qwer",
+    "tret",
+    "qet",
+    "rew"
+};
+
+static const char *const stage5_climax_words[] = {
+    "qwert trewq",
+    "q w e r t",
+    "tree tweet",
+    "were qwe",
+    "rr tt qwe",
+    "qwer tret",
+    "rew qet"
+};
+
+static const char *const stage6_words[] = {
+    "yuiop",
+    "poiuy",
+    "y u i o p",
+    "yy uu",
+    "you",
+    "pop",
+    "poi",
+    "yip",
+    "upup",
+    "yui",
+    "yoyo",
+    "poop",
+    "poppy"
+};
+
+static const char *const stage6_climax_words[] = {
+    "yuiop poiuy",
+    "y u i o p",
+    "you pop",
+    "yoyo poop",
+    "poppy yip",
+    "yy uu poi",
+    "upup yui"
+};
+
+static const char *const stage7_words[] = {
+    "qwert yuiop",
+    "trewq poiuy",
+    "q w e r t y u i o p",
+    "rr uu",
+    "qwe you",
+    "type",
+    "power quiet",
+    "qwerty",
     "quiet",
     "power",
-    "paper",
+    "power",
     "equip",
     "we io",
     "quote",
     "upper",
     "equip power",
     "quiet poet",
-    "qwerty",
-    "pipe",
-    "pop quiz"
+    "pop quit"
 };
 
-static const char *const stage5_climax_words[] = {
+static const char *const stage7_climax_words[] = {
     "equip power",
     "quiet poet",
-    "pop quiz",
+    "pop quit",
     "qwerty pipe",
     "upper quote",
     "power equip",
     "we io qwe",
-    "paper quiet",
+    "power quiet",
     "quote power",
     "pipe pop"
 };
 
-static const char *const stage6_words[] = {
-    "bgn",
-    "gbn",
-    "hjm",
-    "vbn",
-    "nmh",
-    "ghvb",
-    "bnmg",
-    "hgbn",
-    "human",
-    "moving",
-    "gaming",
-    "humble",
-    "magma",
-    "begin",
-    "hinge",
-    "haven",
-    "venom",
-    "minimum",
-    "gh nm",
-    "mvn",
-    "bnhg",
-    "ghvb nm",
-    "vbn gh",
-    "magma hub",
-    "moving hum",
-    "gaming hub",
-    "human vim",
-    "gnb hmv",
-    "humble moving",
-    "begin moving",
-    "venom human"
-};
-
-static const char *const stage6_climax_words[] = {
-    "magma hub",
-    "moving hum",
-    "gaming hub",
-    "human vim",
-    "gnb hmv",
-    "humble moving",
-    "begin moving",
-    "venom human",
-    "minimum venom",
-    "ghvb nm bgn"
-};
-
-static const char *const stage7_words[] = {
+static const char *const stage8_words[] = {
     "z",
     "x",
     "c",
+    "zxcvb",
+    "bvcxz",
+    "z x c v b",
+    "vv bb",
+    "zxc",
+    "zcv",
+    "bvc",
+    "zz bb",
+    "zvb",
+    "cvc",
+    "bzz"
+};
+
+static const char *const stage8_climax_words[] = {
+    "zxcvb bvcxz",
+    "z x c v b",
+    "vv bb zxc",
+    "zvb cvc",
+    "zcv bvc",
+    "zz bb bzz"
+};
+
+static const char *const stage9_words[] = {
+    "nm,./",
+    "/.,mn",
+    "n m , . /",
+    "nn mm",
+    "m,.",
+    "nmn",
+    "m,m",
+    "n/m",
     ",",
     ".",
     "/",
-    "?",
-    "zxc",
-    "cxz",
     ",.",
     "./",
-    "z/c",
-    "m,./",
-    "x.z",
-    "c,/",
-    "z.x,c/",
-    "x/c.z",
-    "c,z.x",
-    "mix.z",
-    "quiz?",
-    "cave/z",
-    "x, z.",
-    "zxc?/."
+    "mnm",
+    "m/m"
 };
 
-static const char *const stage7_climax_words[] = {
+static const char *const stage9_climax_words[] = {
+    "nm,./ /.,mn",
+    "n m , . /",
+    "m,. n/m",
+    "nn mm",
+    "m,m mnm",
+    "nmn m/m",
+    ",. ./"
+};
+
+static const char *const stage10_words[] = {
+    "zxcvb nm,./",
+    "bvcxz /.,mn",
+    "z x c v b n m , . /",
+    "vv nn",
+    "zxc m,.",
+    "vbn",
     "z.x,c/",
     "x/c.z",
     "c,z.x",
-    "mix.z",
-    "quiz?",
-    "cave/z",
+    "z/c",
+    "x.z",
+    "c,/",
+    "x, z."
+};
+
+static const char *const stage10_climax_words[] = {
+    "zxcvb nm,./",
+    "bvcxz /.,mn",
+    "z.x,c/",
+    "x/c.z",
+    "c,z.x",
     "x, z.",
-    "zxc?/.",
     "z/c x.z",
     "c,/ zxc"
 };
 
-static const char *const stage8_words[] = {
+static const char *const stage11_words[] = {
+    "12345",
+    "54321",
+    "1 2 3 4 5",
+    "44 55",
+    "123",
+    "515",
+    "1145",
+    "2424",
+    "3454",
+    "1515",
+    "2345"
+};
+
+static const char *const stage11_climax_words[] = {
+    "12345 54321",
+    "1 2 3 4 5",
+    "1515 2345",
+    "44 55 515",
+    "1145 2424",
+    "3454 123"
+};
+
+static const char *const stage12_words[] = {
+    "67890",
+    "09876",
+    "6 7 8 9 0",
+    "66 77",
+    "789",
+    "9090",
+    "808",
+    "670",
+    "7890",
+    "6868",
+    "9076"
+};
+
+static const char *const stage12_climax_words[] = {
+    "67890 09876",
+    "6 7 8 9 0",
+    "789 9090",
+    "808 670",
+    "66 77 7890",
+    "6868 9076"
+};
+
+static const char *const stage13_words[] = {
+    "12345 67890",
+    "54321 09876",
+    "1 2 3 4 5 6 7 8 9 0",
+    "44 77",
+    "123 789",
+    "2024 808",
+    "405 670",
+    "515 9090",
+    "20260727",
+    "102030",
+    "9090 1010",
+    "2026 0707",
+    "405 1020",
+    "7270 9090"
+};
+
+static const char *const stage13_climax_words[] = {
+    "12345 67890",
+    "54321 09876",
+    "1 2 3 4 5 6 7 8 9 0",
+    "2024 808",
+    "405 670",
+    "515 9090",
+    "20260727",
+    "102030",
+    "9090 1010",
+    "405 1020"
+};
+
+static const char *const stage14_words[] = {
     "FJ",
     "AsDf",
     "SWORD",
@@ -275,7 +395,7 @@ static const char *const stage8_words[] = {
     "Type-Ready"
 };
 
-static const char *const stage8_climax_words[] = {
+static const char *const stage14_climax_words[] = {
     "Magic:ON",
     "No_Miss",
     "Kum-Dor",
@@ -287,56 +407,6 @@ static const char *const stage8_climax_words[] = {
     "Run+Jump",
     "HP=Full",
     "Shift?OK",
-    "Type-Ready"
-};
-
-static const char *const stage9_words[] = {
-    "405-10",
-    "7/27",
-    "HP=014",
-    "Lv3+5",
-    "100%",
-    "1,024",
-    "3.141",
-    "9:00",
-    "#2026",
-    "ID-405",
-    "20/20?",
-    "405:027",
-    "90%-10",
-    "1/2=0.5",
-    "X9-027",
-    "No.405",
-    "7,270",
-    "10:20/30",
-    "#09-Stage",
-    "2026/07/27",
-    "HP100% Lv9",
-    "ID:405-2026",
-    "9090-XY",
-    "10 10%",
-    "2026#07",
-    "405/10:20",
-    "No.9-HP4",
-    "7:27 PM"
-};
-
-static const char *const stage9_climax_words[] = {
-    "1/2=0.5",
-    "X9-027",
-    "No.405",
-    "7,270",
-    "10:20/30",
-    "#09-Stage",
-    "2026/07/27",
-    "HP100% Lv9",
-    "ID:405-2026",
-    "405/10:20",
-    "No.9-HP4",
-    "7:27 PM"
-};
-
-static const char *const stage10_words[] = {
     "!?OK",
     "@@Gate",
     "#1Boss",
@@ -347,21 +417,6 @@ static const char *const stage10_words[] = {
     "HP=10",
     "Final!",
     "Save?No",
-    "Shift+/",
-    "QWERTY!",
-    "KUM-405",
-    "Type:OK!",
-    "Sword#10",
-    "(Stage10)",
-    "No_Miss!",
-    "A1! b2?",
-    "Kumdor_01",
-    "HP=10/10",
-    "Lv+1 OK",
-    "Final-Boss!"
-};
-
-static const char *const stage10_climax_words[] = {
     "Shift+/",
     "QWERTY!",
     "KUM-405",
@@ -392,36 +447,56 @@ static const char *const stage3_miss_quotes[] = {
 };
 
 static const char *const stage4_miss_quotes[] = {
-    "「水面が乱れた。戻る場所を思い出せ」",
-    "「流れに飲まれるな。伸ばす前に構えろ」"
+    "「左右の音がずれた。両手をホーム段へ戻せ」",
+    "「鐘の余韻に流されるな。左右を同じだけ見ろ」"
 };
 
 static const char *const stage5_miss_quotes[] = {
-    "「枝先の文字が逃げた。追う前に息を整えろ」",
-    "「森の呪文がほどけた。上段を見てから打て」"
+    "「水面が乱れた。左手の戻る場所を思い出せ」",
+    "「流れに飲まれるな。伸ばす前に構えろ」"
 };
 
 static const char *const stage6_miss_quotes[] = {
-    "「熱が打鍵を乱したな。境目を見直せ」",
-    "「通路が震えた。左右の境を見失うな」"
+    "「枝先の文字が逃げた。右手を上段へ静かに伸ばせ」",
+    "「森の呪文がほどけた。上段を見てから打て」"
 };
 
 static const char *const stage7_miss_quotes[] = {
-    "「水晶が揺れた。形を一つずつ見ろ」",
-    "「記号の影が跳ねたな。焦らず形を読め」"
+    "「熱が打鍵を乱したな。上段の左右を見直せ」",
+    "「通路が震えた。左右の境を見失うな」"
 };
 
 static const char *const stage8_miss_quotes[] = {
-    "「封印がずれた。大小と記号を落ち着いて見ろ」",
-    "「古文書は急がない。違いを見てから刻め」"
+    "「水晶が揺れた。左手下段の形を一つずつ見ろ」",
+    "「下へ沈む指を急がせるな。打ったら戻せ」"
 };
 
 static const char *const stage9_miss_quotes[] = {
-    "「数字の階段が揺れた。まとまりで見直せ」",
-    "「座標が乱れた。数字と記号を分けて見ろ」"
+    "「記号の影が跳ねたな。右手下段を焦らず読め」",
+    "「水晶の反射に惑うな。記号をひとつずつ見ろ」"
 };
 
 static const char *const stage10_miss_quotes[] = {
+    "「洞窟の奥が揺れた。下段の左右を見失うな」",
+    "「記号までまとめて追うな。形を分けて打て」"
+};
+
+static const char *const stage11_miss_quotes[] = {
+    "「数字の階段が揺れた。左手の数字をまとまりで見直せ」",
+    "「座標が乱れた。左手を数字段からホームへ戻せ」"
+};
+
+static const char *const stage12_miss_quotes[] = {
+    "「右側の数字が跳ねた。右手だけで順番を取り戻せ」",
+    "「塔の灯りがぶれた。数字を見てから打て」"
+};
+
+static const char *const stage13_miss_quotes[] = {
+    "「数字列が崩れた。左右の数字を分けて見ろ」",
+    "「座標が乱れた。まとまりで見直せ」"
+};
+
+static const char *const stage14_miss_quotes[] = {
     "「剣筋が乱れた。課題全体を見て戻れ」",
     "「最後の試練は逃げない。一息置いて打ち切れ」"
 };
@@ -499,158 +574,258 @@ static const Stage stages[] = {
         3,
         "鐘楼が低く鳴り、j、k、l、;の列が指先に戻った。止まっていた村の掲示板にも通信塔の断片的な警告が流れ始める。村人は湖底へ抜ける古い道を教えてくれた。",
         "鐘楼の下で村人が温かい布を差し出した。短い休息のあいだ、左右のホーム段の感覚が指に沈み直していく。",
-        "次は人差し指を上段へ伸ばす。打ったあと、必ずfとjへ戻ることを意識しろ。",
+        "次は左右のホーム段を両手で使う。打ったあと、必ずfとjへ戻ることを意識しろ。",
         3
     },
     {
-        {"湖底の影", 10, 10, 2, ENEMY_TRAIT_REGEN_COUNTER},
+        {"ホーム段の双影", 10, 10, 2, ENEMY_TRAIT_REGEN_COUNTER},
         "ミルファ湖の沈んだ桟橋",
-        "湖面は凍っていないのに、底だけが青白く固まっている。沈んだ桟橋の影から、上段へ伸びる指を狙うものが現れた。",
-        "人差し指の上段: r / t / y / u",
-        "r / t / y / u",
-        "fとjから人差し指を伸ばして打ち、すぐホームに戻す。",
-        "「水面が揺れた時、戻る場所を忘れるな」",
-        "「伸ばした指を戻せる者だけが、深い水を渡れる」",
-        "「水底の流れを速める。戻る場所を失うな」",
+        "湖面は凍っていないのに、底だけが青白く固まっている。沈んだ桟橋の影から、左右のホーム段を同時に試すものが現れた。",
+        "ホーム段 両手: a / s / d / f / j / k / l / ;",
+        "a / s / d / f / j / k / l / ;",
+        "左右の指をホーム段に置き、打ったあと必ずfとjへ戻す。",
+        "「左右の音をそろえられるか。湖底は両手の乱れを映す」",
+        "「左右のホーム段はつながった。次は上段へ進め」",
+        "「水底の流れを速める。両手の戻る場所を失うな」",
         stage4_miss_quotes,
         (int)(sizeof(stage4_miss_quotes) / sizeof(stage4_miss_quotes[0])),
         stage4_words,
         (int)(sizeof(stage4_words) / sizeof(stage4_words[0])),
-        "湖底の影が水面を波立たせ、r t y uを続けて打たせる流れを作った。",
+        "ホーム段の双影が水面を波立たせ、左右のホーム段を続けて打たせる流れを作った。",
         stage4_climax_words,
         (int)(sizeof(stage4_climax_words) / sizeof(stage4_climax_words[0])),
         "クムの実",
         3,
         4,
-        "湖底に細い水路が開き、王都の方角へ流れが戻った。水に沈んだ桟橋の下から、クム3号の航行ログも見つかる。濁った水の奥でクムの実がひとつ光っている。",
+        "湖底に細い水路が開き、王都の方角へ流れが戻った。左右のホーム段をつないだ感覚が、次の上段へ伸びる道を示している。",
         "",
         "",
         0
     },
     {
-        {"上段の魔術師", 10, 10, 3, ENEMY_TRAIT_POISON_EDGE},
+        {"左上段の魔術師", 10, 10, 3, ENEMY_TRAIT_POISON_EDGE},
         "クムの森の入口",
-        "森の木々は灰色に固まり、葉の代わりに文字の欠片を落としている。上段の魔術師は枝先から課題をばらまいた。",
-        "上段の広がり: q / w / e / i / o / p",
-        "q / w / e / i / o / p",
-        "小指・薬指・中指を上段へ伸ばし、戻る位置を意識する。",
-        "「枝先の文字は逃げる。追うなら正確に追え」",
-        "「枝先まで届いたか。森の文字も少し息を吹き返す」",
-        "「枝先の呪文を重ねる。上段まで届かせろ」",
+        "森の木々は灰色に固まり、葉の代わりに文字の欠片を落としている。左上段の魔術師は左手だけで届く枝先から課題をばらまいた。",
+        "上段 左手: q / w / e / r / t",
+        "q / w / e / r / t",
+        "左手を上段へ伸ばし、打ったあとa s d fへ戻す。",
+        "「左の枝先は逃げる。追うなら正確に追え」",
+        "「左手は枝先まで届いた。次は右側の梢だ」",
+        "「枝先の呪文を重ねる。左手上段まで届かせろ」",
         stage5_miss_quotes,
         (int)(sizeof(stage5_miss_quotes) / sizeof(stage5_miss_quotes[0])),
         stage5_words,
         (int)(sizeof(stage5_words) / sizeof(stage5_words[0])),
-        "上段の魔術師が枝先の文字を束ね、上段を広く使う呪文に変えた。",
+        "左上段の魔術師が枝先の文字を束ね、q w e r tを続けて刻む呪文に変えた。",
         stage5_climax_words,
         (int)(sizeof(stage5_climax_words) / sizeof(stage5_climax_words[0])),
         "空気アメ",
         3,
         4,
-        "石の枝に小さな緑が戻った。落ちていた文字の欠片は、誰かが通信塔から呪文を送っている証拠だった。森の奥から、王都の通信塔が発するかすかな断続音が聞こえる。",
+        "石の枝に小さな緑が戻った。左手の上段に触れた文字の欠片が、右側の森へ続く道を示している。",
         "",
         "",
         0
     },
     {
-        {"溶岩の番人", 10, 10, 3, ENEMY_TRAIT_HEAVY_COUNTER},
+        {"右上段の魔術師", 10, 10, 3, ENEMY_TRAIT_HEAVY_COUNTER},
         "ズロワノフ通路跡",
-        "森を抜けると、地面の裂け目に赤い光が走っていた。かつて星間航路を支えた通路跡で、溶岩の番人が中央列を守っている。",
-        "中央から下段: g / h / v / b / n / m",
-        "g / h / v / b / n / m",
-        "人差し指の担当範囲を広げ、左右の境目を覚える。",
-        "「熱に急かされるな。境目を越える指だけが通れる」",
-        "「熱に負けず境目を越えたな。通路はおまえを通す」",
-        "「通路の熱を上げる。境目を越える指を見せろ」",
+        "森を抜けると、地面の裂け目に赤い光が走っていた。右上段の魔術師が、通路の向こうから右手の上段だけを照らしている。",
+        "上段 右手: y / u / i / o / p",
+        "y / u / i / o / p",
+        "右手を上段へ伸ばし、打ったあとj k l ;へ戻す。",
+        "「右の枝先まで届くか。熱に急かされるな」",
+        "「右手も上段へ届いた。両手の上段へ進め」",
+        "「通路の熱を上げる。右手上段の形を見せろ」",
         stage6_miss_quotes,
         (int)(sizeof(stage6_miss_quotes) / sizeof(stage6_miss_quotes[0])),
         stage6_words,
         (int)(sizeof(stage6_words) / sizeof(stage6_words[0])),
-        "溶岩の番人が通路を赤く染め、中央から下段まで続く重い課題を押し出した。",
+        "右上段の魔術師が通路を赤く染め、y u i o pを続けて打たせる呪文を押し出した。",
         stage6_climax_words,
         (int)(sizeof(stage6_climax_words) / sizeof(stage6_climax_words[0])),
         "星チーズ",
         3,
         5,
-        "裂け目の熱が静まり、失われた推進装置の記録が浮かび上がった。クム3号は着陸直前に外部から入力を上書きされている。墜落は事故ではなかった。",
+        "裂け目の熱が静まり、右手上段の感覚が指先へ戻った。クム3号は着陸直前に外部から入力を上書きされている。墜落は事故ではなかった。",
         "ズロワノフ通路跡の熱が引き、石壁の陰に小さな補給箱が見つかった。焦げた手袋を外すと、指先に落ち着きが戻ってくる。",
-        "次は下段と記号が混じる。速く追わず、記号を見たら一呼吸置いて正確に打て。",
+        "次は上段を両手で使う。左右に広がっても、打ったあとホーム段へ戻れ。",
         4
     },
     {
-        {"水晶洞の幻", 10, 10, 3, ENEMY_TRAIT_BLIND_EDGE},
+        {"上段の双術師", 10, 10, 3, ENEMY_TRAIT_BLIND_EDGE},
         "ケムリ苔の水晶洞",
-        "熱病を鎮めるケムリ苔は、水晶の中に閉じ込められていた。洞窟の幻は下段と記号の揺さぶりで集中を奪いにくる。",
-        "下段と記号: z / x / c / , / . / slash / ?",
-        "z / x / c / , / . / Slash / ?",
-        "下段と記号を続けて打っても、打ったあとホームへ戻す。",
-        "「水晶は手元を映さない。記号の影だけを読め」",
-        "「記号の影を読んだか。水晶はもう目を惑わせない」",
-        "「水晶を曇らせる。記号の影だけを読め」",
+        "熱病を鎮めるケムリ苔は、水晶の中に閉じ込められていた。洞窟の幻は上段全体の揺さぶりで集中を奪いにくる。",
+        "上段 両手: q / w / e / r / t / y / u / i / o / p",
+        "q / w / e / r / t / y / u / i / o / p",
+        "上段を両手で打ち分け、打ったあとホームへ戻す。",
+        "「水晶は手元を映さない。上段の影だけを読め」",
+        "「上段の影を読んだか。水晶はもう目を惑わせない」",
+        "「水晶を曇らせる。上段の左右を読め」",
         stage7_miss_quotes,
         (int)(sizeof(stage7_miss_quotes) / sizeof(stage7_miss_quotes[0])),
         stage7_words,
         (int)(sizeof(stage7_words) / sizeof(stage7_words[0])),
-        "水晶洞の幻が記号を反射させ、下段と記号が入り混じる構えになった。",
+        "上段の双術師が水晶に文字を反射させ、上段全体を使う構えになった。",
         stage7_climax_words,
         (int)(sizeof(stage7_climax_words) / sizeof(stage7_climax_words[0])),
         "着色タラコ",
         4,
         5,
-        "水晶が砕け、ケムリ苔が息を吹き返した。洞窟の奥では、薬を待つソルフェスへの発送箱が止まったまま並んでいる。ソルフェスへ送る薬も、王都を救う手がかりも手に入った。",
+        "水晶が砕け、ケムリ苔が息を吹き返した。上段の文字は整い、洞窟のさらに深い下段へ進む道が開く。",
         "",
         "",
         0
     },
     {
-        {"古文書の魔術師", 10, 10, 3, ENEMY_TRAIT_POISON_EDGE},
+        {"左下段の幻", 10, 10, 3, ENEMY_TRAIT_POISON_EDGE},
         "王立図書庫の地下",
-        "王都クミエルの地下には、古いキーボード術の記録が眠っていた。古文書の魔術師は大文字と記号で封印を重ねる。",
-        "総合練習: 大文字・小文字・記号",
-        "Shift / 大文字 / 記号 / 数字",
-        "速さより正確さを優先し、Shiftや記号も落ち着いて打つ。",
-        "「古い封印は、ひとつの大小の違いも見逃さない」",
-        "「大小の違いを越えた入力だ。封印はここでほどける」",
-        "「封印を重ねる。大小の違いを刻め」",
+        "王都クミエルの地下には、古いキーボード術の記録が眠っていた。左下段の幻は、左手を下へ沈める課題で封印を守っている。",
+        "下段 左手: z / x / c / v / b",
+        "z / x / c / v / b",
+        "左手を下段へ下げ、打ったあとホーム段へ戻す。",
+        "「下へ沈む左手を見せろ。封印は戻る指を見ている」",
+        "「左下段はほどけた。次は右下段の記号だ」",
+        "「封印を重ねる。左下段の形を刻め」",
         stage8_miss_quotes,
         (int)(sizeof(stage8_miss_quotes) / sizeof(stage8_miss_quotes[0])),
         stage8_words,
         (int)(sizeof(stage8_words) / sizeof(stage8_words[0])),
-        "古文書の魔術師がページをめくり、大文字、数字、記号を重ねた封印を開いた。",
+        "左下段の幻がページをめくり、z x c v bを続けて刻む封印を開いた。",
         stage8_climax_words,
         (int)(sizeof(stage8_climax_words) / sizeof(stage8_climax_words[0])),
         "3色ダンゴ",
         4,
         6,
-        "封印の一枚が剥がれ、古文書はクムドールの剣が文字を正すための道具だったと示した。石化の中心は王城ではない。通信塔の頂上に、最後の入力源がある。",
+        "封印の一枚が剥がれ、左下段の感覚が戻った。古文書の奥には、右下段の記号を示す古い図が残されている。",
         "",
         "",
         0
     },
     {
-        {"数字の壁", 10, 10, 4, ENEMY_TRAIT_REGEN_COUNTER},
+        {"右下段の幻", 10, 10, 4, ENEMY_TRAIT_REGEN_COUNTER},
         "クミエル通信塔",
-        "塔の壁面には、墜落直前に見た数字列が焼き付いていた。数字の壁は、入力順をひとつでも誤れば階段を消してしまう。",
-        "数字キーと記号: 数字列 / - / slash / % / :",
-        "数字 / - / Slash / % / :",
-        "数字段を打ったあとホームへ戻し、記号との切り替えで焦らない。",
-        "「数字は嘘をつかない。だが順番を誤れば道は消える」",
-        "「順番は正された。数字の階段は頂上へ続く」",
-        "「数字の階段を組み替える。順番を崩すな」",
+        "塔の壁面には、墜落直前に見た記号列が焼き付いていた。右下段の幻は、右手の下段と記号で階段を隠している。",
+        "下段 右手: n / m / , / . / slash",
+        "n / m / , / . / Slash",
+        "右手を下段へ下げ、記号を見たら一呼吸置いて打つ。",
+        "「右下段は形が似る。だが順番を誤れば道は消える」",
+        "「右下段は正された。下段の両手へ進め」",
+        "「記号の階段を組み替える。順番を崩すな」",
         stage9_miss_quotes,
         (int)(sizeof(stage9_miss_quotes) / sizeof(stage9_miss_quotes[0])),
         stage9_words,
         (int)(sizeof(stage9_words) / sizeof(stage9_words[0])),
-        "数字の壁が座標を組み替え、数字と記号の長い列で階段を隠した。",
+        "右下段の幻が座標を組み替え、n m , . / の長い列で階段を隠した。",
         stage9_climax_words,
         (int)(sizeof(stage9_climax_words) / sizeof(stage9_climax_words[0])),
         "健康ドリンク",
         4,
         6,
-        "数字列が整列し、塔の上層へ続く扉が開いた。墜落時に乱れた計器の数字も、正しい座標へ戻っていく。そこにはクムドールの剣を封じた最後の試練が待っている。",
+        "記号列が整列し、塔の上層へ続く扉が開いた。墜落時に乱れた計器の表示も、少しずつ正しい形へ戻っていく。",
         "通信塔の踊り場で、古い端末がまだ淡く光っていた。指を休めるあいだ、塔の風が毒気と焦りを洗い流していく。",
-        "最後は大文字、数字、記号、スペースが混ざる。課題全体を一度見てから、まとまりごとに打て。",
+        "次は下段を両手で使う。記号が混じっても、左右の担当を見失うな。",
         5
+    },
+    {
+        {"下段の双幻", 10, 10, 4, ENEMY_TRAIT_HEAVY_COUNTER},
+        "通信塔最上階",
+        "塔の最上階へ続く床に、下段の文字と記号が剣の形に並ぶ。下段の双幻は、左右の下段を同時に求めてきた。",
+        "下段 両手: z / x / c / v / b / n / m / , / . / slash",
+        "z / x / c / v / b / n / m / , / . / Slash",
+        "下段と記号を両手で打ち分け、打ったあとホームへ戻す。",
+        "「下段すべてを取り戻すなら、記号まで目を逸らすな」",
+        "「下段はつながった。次は数字段へ上がれ」",
+        "「下段を剣に重ねる。最後まで打ち切れ」",
+        stage10_miss_quotes,
+        (int)(sizeof(stage10_miss_quotes) / sizeof(stage10_miss_quotes[0])),
+        stage10_words,
+        (int)(sizeof(stage10_words) / sizeof(stage10_words[0])),
+        "下段の双幻が剣の形に光り、下段と記号の打ち分けを一息で求めてきた。",
+        stage10_climax_words,
+        (int)(sizeof(stage10_climax_words) / sizeof(stage10_climax_words[0])),
+        "立喰いソバ",
+        4,
+        6,
+        "下段の文字が剣へ戻り、残る欠けは数字段だけになった。塔の外で通信灯が点滅し、数字の階段が現れる。",
+        "",
+        "",
+        0
+    },
+    {
+        {"左数字の壁", 10, 10, 4, ENEMY_TRAIT_POISON_EDGE},
+        "クミエル通信塔 左翼",
+        "塔の左翼には、墜落直前に見た左側の数字列が焼き付いていた。左数字の壁は、左手の数字だけを正確に刻む者を通す。",
+        "数字 左手: 1 / 2 / 3 / 4 / 5",
+        "1 / 2 / 3 / 4 / 5",
+        "左手を数字段へ伸ばし、打ったあとホーム段へ戻す。",
+        "「左の数字は階段の始まりだ。順番を崩すな」",
+        "「左の数字は整った。次は右の数字を戻せ」",
+        "「左数字の階段を組み替える。まとまりを見失うな」",
+        stage11_miss_quotes,
+        (int)(sizeof(stage11_miss_quotes) / sizeof(stage11_miss_quotes[0])),
+        stage11_words,
+        (int)(sizeof(stage11_words) / sizeof(stage11_words[0])),
+        "左数字の壁が座標を組み替え、1 2 3 4 5を続けて打たせる階段を作った。",
+        stage11_climax_words,
+        (int)(sizeof(stage11_climax_words) / sizeof(stage11_climax_words[0])),
+        "通信ゼリー",
+        4,
+        6,
+        "左側の数字列が整列し、塔の計器が半分だけ息を吹き返した。右側の数字がまだ乱れ、頂上への扉を閉ざしている。",
+        "",
+        "",
+        0
+    },
+    {
+        {"右数字の壁", 10, 10, 4, ENEMY_TRAIT_REGEN_COUNTER},
+        "クミエル通信塔 右翼",
+        "塔の右翼では、右側の数字列が淡く点滅していた。右数字の壁は、右手だけで数字段を渡る力を試してくる。",
+        "数字 右手: 6 / 7 / 8 / 9 / 0",
+        "6 / 7 / 8 / 9 / 0",
+        "右手を数字段へ伸ばし、打ったあとホーム段へ戻す。",
+        "「右の数字は頂上へ続く。急げば足場は消える」",
+        "「右の数字も整った。両手で数字段をつなげ」",
+        "「右数字の階段を組み替える。順番を崩すな」",
+        stage12_miss_quotes,
+        (int)(sizeof(stage12_miss_quotes) / sizeof(stage12_miss_quotes[0])),
+        stage12_words,
+        (int)(sizeof(stage12_words) / sizeof(stage12_words[0])),
+        "右数字の壁が座標を組み替え、6 7 8 9 0を続けて打たせる階段を作った。",
+        stage12_climax_words,
+        (int)(sizeof(stage12_climax_words) / sizeof(stage12_climax_words[0])),
+        "健康ドリンク",
+        4,
+        6,
+        "右側の数字列が整列し、塔の計器が正しい座標を示した。左右の数字をつなげれば、最上階の封印に届く。",
+        "通信塔の踊り場で、古い端末がまだ淡く光っていた。指を休めるあいだ、塔の風が毒気と焦りを洗い流していく。",
+        "次は数字段を両手で使う。数字と記号が混じっても、左右の担当を見失うな。",
+        5
+    },
+    {
+        {"数字の双壁", 10, 10, 4, ENEMY_TRAIT_BLIND_EDGE},
+        "クミエル通信塔 上層",
+        "塔の上層では、左右の数字列がひとつの座標へ結ばれていた。数字の双壁は、両手の数字段と記号を混ぜて最後の扉を守る。",
+        "数字 両手: 1 / 2 / 3 / 4 / 5 / 6 / 7 / 8 / 9 / 0",
+        "1 / 2 / 3 / 4 / 5 / 6 / 7 / 8 / 9 / 0",
+        "数字段を両手で打ち分け、打ったあとホーム段へ戻す。",
+        "「数字は嘘をつかない。だが左右を誤れば扉は閉じる」",
+        "「数字段はつながった。最後の試練へ進め」",
+        "「数字の階段を組み替える。まとまりで見直せ」",
+        stage13_miss_quotes,
+        (int)(sizeof(stage13_miss_quotes) / sizeof(stage13_miss_quotes[0])),
+        stage13_words,
+        (int)(sizeof(stage13_words) / sizeof(stage13_words[0])),
+        "数字の双壁が座標を組み替え、数字と記号の長い列で階段を隠した。",
+        stage13_climax_words,
+        (int)(sizeof(stage13_climax_words) / sizeof(stage13_climax_words[0])),
+        "星チーズ",
+        4,
+        7,
+        "数字列が整列し、塔の上層へ続く最後の扉が開いた。墜落時に乱れた計器の数字も、正しい座標へ戻っていく。",
+        "",
+        "",
+        0
     },
     {
         {"クムドールの試練", 10, 10, 4, ENEMY_TRAIT_HEAVY_COUNTER},
@@ -662,13 +837,13 @@ static const Stage stages[] = {
         "「すべてのキーを取り戻すなら、最後まで目を逸らすな」",
         "「最後まで目を逸らさなかったな。クムドールの剣は応えた」",
         "「すべてのキーを剣に重ねる。最後まで打ち切れ」",
-        stage10_miss_quotes,
-        (int)(sizeof(stage10_miss_quotes) / sizeof(stage10_miss_quotes[0])),
-        stage10_words,
-        (int)(sizeof(stage10_words) / sizeof(stage10_words[0])),
+        stage14_miss_quotes,
+        (int)(sizeof(stage14_miss_quotes) / sizeof(stage14_miss_quotes[0])),
+        stage14_words,
+        (int)(sizeof(stage14_words) / sizeof(stage14_words[0])),
         "クムドールの試練が剣の形に光り、これまでのすべての打鍵を一息で求めてきた。",
-        stage10_climax_words,
-        (int)(sizeof(stage10_climax_words) / sizeof(stage10_climax_words[0])),
+        stage14_climax_words,
+        (int)(sizeof(stage14_climax_words) / sizeof(stage14_climax_words[0])),
         "立喰いソバ",
         10,
         8,
@@ -676,7 +851,7 @@ static const Stage stages[] = {
         "",
         "",
         0
-    }
+    },
 };
 
 const Stage *get_stages(int *stage_count) {

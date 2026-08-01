@@ -80,10 +80,10 @@ run_case "complete" "$complete_save" "完全勝利の証が刻まれています
 1
 :savequit'
 
-v3_case_dir="$TMP_DIR/save-v3"
-mkdir -p "$v3_case_dir"
-output=$(cd "$v3_case_dir" && printf '1\n:savequit\n' | KUMDOR_NO_BGM=1 "$GAME")
+v4_case_dir="$TMP_DIR/save-v4"
+mkdir -p "$v4_case_dir"
+output=$(cd "$v4_case_dir" && printf '1\n:savequit\n' | KUMDOR_NO_BGM=1 "$GAME")
 printf '%s' "$output" | grep -q "記録を刻んだ。ここで剣を収める。"
-head -n 1 "$v3_case_dir/kumdor_save.txt" | grep -q '^KUMDOR_SAVE_V3 '
+head -n 1 "$v4_case_dir/kumdor_save.txt" | grep -q '^KUMDOR_SAVE_V4 '
 
 echo "save checks passed"

@@ -538,7 +538,7 @@ static int prompt_start_choice(void) {
 
     if (!read_line(input)) {
         printf("\n入力が途切れたため、終了します。\n");
-        return 0;
+        return -2;
     }
 
     if (input[0] == '\0' || strcmp(input, "1") == 0) {
