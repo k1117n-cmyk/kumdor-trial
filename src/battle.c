@@ -29,7 +29,7 @@ static const char *status_name(unsigned char status);
 static const char *enemy_trait_name(EnemyTrait trait);
 static const char *enemy_trait_description(EnemyTrait trait);
 static void print_help(void);
-static int read_input(char input[], int hide_echo);
+static int read_input(char input[], int hide_echo, int lock_edit);
 static int is_correct_input(const char input[], const char target[]);
 static void print_miss_hint(const char input[], const char target[]);
 static const char *choose_message(const char *const messages[], int message_count);
@@ -100,6 +100,15 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
                color(COLOR_RESET),
                color(COLOR_RED),
                color(COLOR_RESET));
+    } else if (player->status & STATUS_LOCKED) {
+        printf("%s[課題]%s %s%s%s %s(修正不可: Backspace/Delete無効)%s\n",
+               color(COLOR_YELLOW),
+               color(COLOR_RESET),
+               color(COLOR_YELLOW),
+               target,
+               color(COLOR_RESET),
+               color(COLOR_RED),
+               color(COLOR_RESET));
     } else {
         printf("%s[課題]%s %s%s%s\n",
                color(COLOR_YELLOW),
@@ -109,7 +118,7 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
                color(COLOR_RESET));
     }
 
-    if (!read_input(input, (player->status & STATUS_BLIND) != 0)) {
+    if (!read_input(input, (player->status & STATUS_BLIND) != 0, (player->status & STATUS_LOCKED) != 0)) {
         int was_poisoned = (player->status & STATUS_POISON) != 0;
 
         printf("%s➔ 入力が読み取れなかった！ 反撃を受ける！%s\n",
@@ -192,6 +201,10 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
             player->status &= ~STATUS_BLIND;
             printf("%s（暗闇が晴れた！）%s\n", color(COLOR_GREEN), color(COLOR_RESET));
         }
+        if (player->status & STATUS_LOCKED) {
+            player->status &= ~STATUS_LOCKED;
+            printf("%s（指先のこわばりが解けた！）%s\n", color(COLOR_GREEN), color(COLOR_RESET));
+        }
     } else {
         int was_poisoned = (player->status & STATUS_POISON) != 0;
 
@@ -214,8 +227,20 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
 }
 
 static const char *status_name(unsigned char status) {
+    if ((status & STATUS_POISON) && (status & STATUS_BLIND) && (status & STATUS_LOCKED)) {
+        return "毒+暗闇+修正不可";
+    }
+
     if ((status & STATUS_POISON) && (status & STATUS_BLIND)) {
         return "毒+暗闇";
+    }
+
+    if ((status & STATUS_POISON) && (status & STATUS_LOCKED)) {
+        return "毒+修正不可";
+    }
+
+    if ((status & STATUS_BLIND) && (status & STATUS_LOCKED)) {
+        return "暗闇+修正不可";
     }
 
     if (status & STATUS_POISON) {
@@ -224,6 +249,10 @@ static const char *status_name(unsigned char status) {
 
     if (status & STATUS_BLIND) {
         return "暗闇";
+    }
+
+    if (status & STATUS_LOCKED) {
+        return "修正不可";
     }
 
     return "通常";
@@ -266,7 +295,7 @@ static void print_help(void) {
     printf("[課題] に表示された文字列を完全一致で入力すると攻撃します。大文字・小文字、スペース、記号も区別します。\n");
     printf("[状態] にはHP、状態異常、敵HPが表示されます。\n");
     printf("毒状態では、正解しても攻撃できず毒の解除に使われます。毒中に失敗が続くと追加ダメージを受けます。\n");
-    printf("暗闇状態では、入力中の文字が画面に表示されません。正解すると解除されます。\n");
+    printf("暗闇状態では、入力中の文字が画面に表示されません。修正不可状態では、Backspace/Deleteで戻せません。正解すると解除されます。\n");
     printf("タイプミスすると敵が反撃し、入力のずれに応じた短いヒントが出ます。\n");
     printf("3連続正解するたびに追加の一撃が入ります。\n");
     printf("コマンド入力はターンを消費しません。\n");
@@ -279,27 +308,73 @@ static void print_help(void) {
     printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n\n", MUTE_COMMAND);
 }
 
-static int read_input(char input[], int hide_echo) {
+static int read_input(char input[], int hide_echo, int lock_edit) {
 #if defined(__unix__) || defined(__APPLE__)
     struct termios old_terminal;
-    struct termios hidden_terminal;
+    struct termios changed_terminal;
     int echo_hidden = 0;
+    int edit_locked = 0;
 #endif
 
     if (hide_echo) {
         printf("課題を入力してEnter（暗闇: 入力は表示されません / :helpでヘルプ）: ");
+    } else if (lock_edit) {
+        printf("課題を入力してEnter（修正不可: Backspace/Delete無効 / :helpでヘルプ）: ");
     } else {
         printf("課題を入力してEnter（:helpでヘルプ）: ");
     }
     fflush(stdout);
 
 #if defined(__unix__) || defined(__APPLE__)
-    if (hide_echo && isatty(STDIN_FILENO) && tcgetattr(STDIN_FILENO, &old_terminal) == 0) {
-        hidden_terminal = old_terminal;
-        hidden_terminal.c_lflag &= (tcflag_t)~ECHO;
-        if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &hidden_terminal) == 0) {
-            echo_hidden = 1;
+    if ((hide_echo || lock_edit) && isatty(STDIN_FILENO) && tcgetattr(STDIN_FILENO, &old_terminal) == 0) {
+        changed_terminal = old_terminal;
+        if (hide_echo) {
+            changed_terminal.c_lflag &= (tcflag_t)~ECHO;
         }
+        if (lock_edit && !hide_echo) {
+            changed_terminal.c_lflag &= (tcflag_t)~(ICANON | ECHO);
+            changed_terminal.c_cc[VMIN] = 1;
+            changed_terminal.c_cc[VTIME] = 0;
+        }
+        if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &changed_terminal) == 0) {
+            echo_hidden = hide_echo;
+            edit_locked = lock_edit && !hide_echo;
+        }
+    }
+#endif
+
+#if defined(__unix__) || defined(__APPLE__)
+    if (edit_locked) {
+        size_t input_length = 0;
+
+        while (input_length + 1 < INPUT_BUFFER_SIZE) {
+            char ch;
+            ssize_t read_count = read(STDIN_FILENO, &ch, 1);
+
+            if (read_count <= 0) {
+                tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_terminal);
+                printf("\n");
+                return 0;
+            }
+
+            if (ch == '\n' || ch == '\r') {
+                break;
+            }
+
+            if (ch == '\b' || ch == 127) {
+                continue;
+            }
+
+            input[input_length] = ch;
+            input_length++;
+            putchar(ch);
+            fflush(stdout);
+        }
+
+        input[input_length] = '\0';
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_terminal);
+        printf("\n");
+        return 1;
     }
 #endif
 
@@ -468,14 +543,21 @@ static void print_enemy_intent(EnemyIntent intent, const Enemy *enemy) {
 }
 
 static void apply_miss_blind(Player *player, int current_stage) {
-    if (current_stage < 2 || (player->status & STATUS_BLIND)) {
+    if (current_stage < 2 || (player->status & (STATUS_BLIND | STATUS_LOCKED))) {
         return;
     }
 
-    player->status |= STATUS_BLIND;
-    printf("%s（焦りで視界が乱れた。次の入力は手元を頼れない！）%s\n",
-           color(COLOR_YELLOW),
-           color(COLOR_RESET));
+    if (rand() % 2 == 0) {
+        player->status |= STATUS_BLIND;
+        printf("%s（焦りで視界が乱れた。次の入力は手元を頼れない！）%s\n",
+               color(COLOR_YELLOW),
+               color(COLOR_RESET));
+    } else {
+        player->status |= STATUS_LOCKED;
+        printf("%s（指先がこわばった。次の入力はBackspace/Deleteで戻せない！）%s\n",
+               color(COLOR_YELLOW),
+               color(COLOR_RESET));
+    }
 }
 
 static void maybe_apply_climax_poison(Player *player, const Enemy *enemy, int is_climax) {

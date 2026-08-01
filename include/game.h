@@ -4,6 +4,7 @@
 #define STATUS_NORMAL 0x00
 #define STATUS_POISON 0x01
 #define STATUS_BLIND  0x02
+#define STATUS_LOCKED 0x04
 
 #define INPUT_BUFFER_SIZE 64
 #define EXP_TO_LEVEL_UP 10
