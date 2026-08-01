@@ -58,6 +58,7 @@ typedef struct {
     const char *place;
     const char *story;
     const char *lesson;
+    const char *focus_keys;
     const char *tip;
     const char *enemy_quote;
     const char *defeat_quote;

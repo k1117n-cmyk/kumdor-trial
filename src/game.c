@@ -185,6 +185,7 @@ static void print_stage_intro(int stage_number, int stage_count, const Stage *st
     printf("場所    : %s\n", stage->place);
     printf("%s\n", stage->story);
     printf("練習内容: %s\n", stage->lesson);
+    printf("今回のキー: %s\n", stage->focus_keys);
     printf("指使い  : %s\n", stage->tip);
     printf("敵      : %s%s%s\n", color(COLOR_RED), stage->enemy.name, color(COLOR_RESET));
     printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
