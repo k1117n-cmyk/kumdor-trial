@@ -962,6 +962,12 @@ static void print_rest_fortune(void) {
            color(COLOR_MAGENTA),
            color(COLOR_RESET),
            message);
+    printf("       ______________________\n");
+    printf("      /  KUMDOR TRAVEL PASS  \\\n");
+    printf("     /________________________\\\n");
+    printf("     |  []  []  []  []  []   |\n");
+    printf("     |    next key ahead     |\n");
+    printf("     |_______________________|\n");
 }
 
 static void print_rest_kum_moose(void) {
