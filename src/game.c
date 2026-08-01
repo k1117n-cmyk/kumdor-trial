@@ -334,12 +334,20 @@ static void print_rest_kum_moose(void) {
         "スペースも剣筋の一部、モォォ……",
         "Shiftは焦らず押せ、モォォ……"
     };
-    const char *message = moose_messages[rand() % (int)(sizeof(moose_messages) / sizeof(moose_messages[0]))];
+    static int last_message_index = -1;
+    int message_count = (int)(sizeof(moose_messages) / sizeof(moose_messages[0]));
+    int message_index = rand() % message_count;
+
+    if (message_count > 1 && message_index == last_message_index) {
+        message_index = (message_index + 1 + rand() % (message_count - 1)) % message_count;
+    }
+
+    last_message_index = message_index;
 
     printf("%s【クムムースの助言】%s\n",
            color(COLOR_MAGENTA),
            color(COLOR_RESET));
-    printf("  < %s >\n", message);
+    printf("  < %s >\n", moose_messages[message_index]);
     printf("    o   \\_\\_    _/_/\n");
     printf("     o      \\__/\n");
     printf("            (oo)\\_______\n");
