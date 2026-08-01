@@ -13,7 +13,8 @@
 #define SAVE_FORMAT_HEADER_V3 "KUMDOR_SAVE_V3"
 #define SAVE_FORMAT_HEADER_V4 "KUMDOR_SAVE_V4"
 #define SAVE_FORMAT_HEADER_V5 "KUMDOR_SAVE_V5"
-#define SAVE_FORMAT_HEADER SAVE_FORMAT_HEADER_V5
+#define SAVE_FORMAT_HEADER_V6 "KUMDOR_SAVE_V6"
+#define SAVE_FORMAT_HEADER SAVE_FORMAT_HEADER_V6
 #define LEGACY_STAGE_COUNT 10
 #define SAVE_FORMAT_V4_STAGE_COUNT 14
 #define VALID_STATUS_MASK (STATUS_POISON | STATUS_BLIND | STATUS_LOCKED)
@@ -79,7 +80,30 @@ int load_game(Player *player, int *start_stage, int stage_count) {
         return 0;
     }
 
-    if (strcmp(header, SAVE_FORMAT_HEADER_V5) == 0) {
+    if (strcmp(header, SAVE_FORMAT_HEADER_V6) == 0) {
+        if (fscanf(file, "%d", &saved_stage_count) != 1) {
+            fclose(file);
+            printf("記録の石板を読み取れませんでした。新たに試練へ向かいます。\n");
+            return 0;
+        }
+        if (saved_stage_count <= 0 || saved_stage_count > MAX_STAGE_COUNT) {
+            fclose(file);
+            printf("記録の石板に収められた試練の数に乱れがあります。新たに試練へ向かいます。\n");
+            return 0;
+        }
+        for (int stage = 0; stage < saved_stage_count; stage++) {
+            if (fscanf(file,
+                       "%d %d %d %d",
+                       &loaded_player.stage_correct_counts[stage],
+                       &loaded_player.stage_miss_counts[stage],
+                       &loaded_player.stage_input_error_counts[stage],
+                       &loaded_player.stage_max_combo_counts[stage]) != 4) {
+                fclose(file);
+                printf("記録の石板を読み取れませんでした。新たに試練へ向かいます。\n");
+                return 0;
+            }
+        }
+    } else if (strcmp(header, SAVE_FORMAT_HEADER_V5) == 0) {
         saved_stage_count = MAX_STAGE_COUNT;
         for (int stage = 0; stage < saved_stage_count; stage++) {
             if (fscanf(file,
@@ -200,7 +224,7 @@ int save_game(const Player *player, int next_stage, int stage_count) {
     }
 
     fprintf(file,
-            "%s %d %d %d %u %d %d %d %d %d %d\n",
+            "%s %d %d %d %u %d %d %d %d %d %d %d\n",
             SAVE_FORMAT_HEADER,
             next_stage,
             player->hp,
@@ -211,7 +235,8 @@ int save_game(const Player *player, int next_stage, int stage_count) {
             player->input_error_count,
             player->reached_stage,
             player->level,
-            player->exp);
+            player->exp,
+            stage_count);
 
     for (int stage = 0; stage < MAX_STAGE_COUNT; stage++) {
         fprintf(file,

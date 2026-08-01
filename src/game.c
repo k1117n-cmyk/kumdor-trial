@@ -27,11 +27,18 @@ typedef struct {
     int target_count;
 } PreStage;
 
+typedef struct {
+    int stage_number;
+    const char *label;
+} MainEntryPoint;
+
 static void print_title(void);
 static void print_prologue(void);
-static int run_start_menu(void);
+static int run_start_menu(int *start_stage, int stage_count);
 static void print_how_to_play(void);
 static void run_prestage_menu(void);
+static int run_main_entry_menu(int stage_count);
+static void prepare_entry_player(Player *player, int start_stage);
 static int prompt_start_choice(void);
 static int prompt_prestage_choice(void);
 static void run_all_prestages(void);
@@ -306,6 +313,17 @@ static const PreStage prestages[] = {
     }
 };
 
+static const MainEntryPoint main_entry_points[] = {
+    {1, "最初から"},
+    {2, "ホーム段 左手・右手・両手"},
+    {5, "上段 左手・右手・両手"},
+    {8, "下段 左手・右手・両手"},
+    {11, "数字 左手・右手・両手"},
+    {14, "総合練習の入口"},
+    {15, "全キー練習 前半"},
+    {18, "全キー練習 後半"}
+};
+
 int run_game(void) {
     seed_random();
     atexit(cleanup_audio);
@@ -323,13 +341,21 @@ int run_game(void) {
 
     print_title();
     if (!load_game(&player, &start_stage, stage_count)) {
-        if (!run_start_menu()) {
+        if (!run_start_menu(&start_stage, stage_count)) {
             printf("\n%s【終了】%sクムドールの試練を始めずに終了しました。\n",
                    color(COLOR_BLUE),
                    color(COLOR_RESET));
             return 0;
         }
-        print_prologue();
+        if (start_stage == 0) {
+            print_prologue();
+        } else {
+            prepare_entry_player(&player, start_stage);
+            printf("\n%s【本編エントリー】%s第%dステージから練習を始めます。\n\n",
+                   color(COLOR_CYAN),
+                   color(COLOR_RESET),
+                   start_stage + 1);
+        }
     }
 
     for (int stage = start_stage; stage < stage_count && player.hp > 0 && !quit_requested; stage++) {
@@ -425,7 +451,7 @@ static void print_prologue(void) {
     printf("それでも、指はまだホームポジションを覚えている。\n\n");
 }
 
-static int run_start_menu(void) {
+static int run_start_menu(int *start_stage, int stage_count) {
     while (1) {
         int choice = prompt_start_choice();
 
@@ -435,11 +461,21 @@ static int run_start_menu(void) {
         }
 
         if (choice == 1) {
+            *start_stage = 0;
             return 1;
         }
 
         if (choice == 2) {
             run_prestage_menu();
+            continue;
+        }
+
+        if (choice == 3) {
+            int selected_stage = run_main_entry_menu(stage_count);
+            if (selected_stage >= 0) {
+                *start_stage = selected_stage;
+                return 1;
+            }
             continue;
         }
 
@@ -449,6 +485,59 @@ static int run_start_menu(void) {
 
         printf("選択できる番号を入力してください。\n");
     }
+}
+
+static int run_main_entry_menu(int stage_count) {
+    char input[INPUT_BUFFER_SIZE];
+    int entry_count = (int)(sizeof(main_entry_points) / sizeof(main_entry_points[0]));
+    char *endptr;
+    long choice;
+
+    while (1) {
+        printf("\n%s【本編エントリー】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+        printf("練習したい区切りから本編を始められます。\n");
+        for (int i = 0; i < entry_count; i++) {
+            if (main_entry_points[i].stage_number <= stage_count) {
+                printf("%d: 第%dステージから - %s\n",
+                       i + 1,
+                       main_entry_points[i].stage_number,
+                       main_entry_points[i].label);
+            }
+        }
+        printf("b: 最初のメニューへ戻る\n");
+        printf("選択: ");
+
+        if (!read_line(input)) {
+            printf("\n入力が途切れたため、最初のメニューへ戻ります。\n");
+            return -1;
+        }
+
+        if (strcmp(input, "b") == 0 ||
+            strcmp(input, "B") == 0 ||
+            strcmp(input, "back") == 0 ||
+            strcmp(input, "BACK") == 0) {
+            return -1;
+        }
+
+        choice = strtol(input, &endptr, 10);
+        if (input[0] != '\0' && *endptr == '\0' && choice >= 1 && choice <= entry_count) {
+            int selected_stage_number = main_entry_points[choice - 1].stage_number;
+            if (selected_stage_number <= stage_count) {
+                return selected_stage_number - 1;
+            }
+        }
+
+        printf("選択できる番号を入力してください。\n");
+    }
+}
+
+static void prepare_entry_player(Player *player, int start_stage) {
+    int bonus_levels = start_stage / 3;
+
+    player->level += bonus_levels;
+    player->max_hp += bonus_levels * 2;
+    player->hp = player->max_hp;
+    player->reached_stage = start_stage + 1;
 }
 
 static void run_prestage_menu(void) {
@@ -532,6 +621,7 @@ static int prompt_start_choice(void) {
     printf("0: ゲームの遊び方\n");
     printf("1: ゲームを始める\n");
     printf("2: プレステージで練習する\n");
+    printf("3: 本編の途中から練習する\n");
     printf("q: 終了\n");
     printf("選択: ");
 
@@ -550,6 +640,10 @@ static int prompt_start_choice(void) {
 
     if (strcmp(input, "2") == 0) {
         return 2;
+    }
+
+    if (strcmp(input, "3") == 0) {
+        return 3;
     }
 
     if (strcmp(input, "q") == 0 ||

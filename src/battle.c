@@ -323,11 +323,11 @@ static int read_input(char input[], int hide_echo, int lock_edit) {
 #endif
 
     if (hide_echo) {
-        printf("課題を入力してEnter（暗闇: 入力は表示されません / :helpでヘルプ）: ");
+        printf("課題を入力してEnter（暗闇: 入力非表示 / :helpヘルプ / :keys対応表）: ");
     } else if (lock_edit) {
-        printf("課題を入力してEnter（修正不可: Backspace/Delete無効 / :helpでヘルプ）: ");
+        printf("課題を入力してEnter（修正不可: Backspace無効 / :helpヘルプ / :keys対応表）: ");
     } else {
-        printf("課題を入力してEnter（:helpでヘルプ）: ");
+        printf("課題を入力してEnter（:helpヘルプ / :keys対応表）: ");
     }
     fflush(stdout);
 
