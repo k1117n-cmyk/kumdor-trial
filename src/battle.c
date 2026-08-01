@@ -141,6 +141,11 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
         return 1;
     }
 
+    if (strcmp(input, KEYMAP_COMMAND) == 0) {
+        print_finger_key_map();
+        return 1;
+    }
+
     if (strcmp(input, BGM_COMMAND) == 0 || strcmp(input, MUTE_COMMAND) == 0) {
         toggle_bgm();
         return 1;
@@ -304,6 +309,7 @@ static void print_help(void) {
     printf("  %-10s 記録せずに終了\n", QUIT_COMMAND);
     printf("  %-10s 記録を刻んで終了\n", SAVE_QUIT_COMMAND);
     printf("  %-10s このヘルプを表示\n", HELP_COMMAND);
+    printf("  %-10s 指とキーの対応を表示\n", KEYMAP_COMMAND);
     printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n", BGM_COMMAND);
     printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n\n", MUTE_COMMAND);
 }

@@ -38,7 +38,6 @@ static void run_all_prestages(void);
 static int run_prestage(const PreStage *prestage, int prestage_number);
 static void print_prestage_intro(const PreStage *prestage, int prestage_number);
 static void print_prestage_help(void);
-static void print_finger_key_map(void);
 static void print_key_map_row(const char *label, const char *const items[], const char *const column_colors[]);
 static int read_line(char input[]);
 static void print_stage_transition(int next_stage_number, int stage_count);
@@ -724,7 +723,7 @@ static void print_prestage_help(void) {
     printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n\n", MUTE_COMMAND);
 }
 
-static void print_finger_key_map(void) {
+void print_finger_key_map(void) {
     const char *const column_colors[] = {
         COLOR_RED,
         COLOR_YELLOW,
@@ -1005,6 +1004,11 @@ static void print_rest_supply_cart(void) {
            color(COLOR_MAGENTA),
            color(COLOR_RESET),
            cargo);
+    printf("      _____________\n");
+    printf("  ___/ KUM-3  ____ \\___\n");
+    printf(" / _  _  _  _/   \\_  _ \\\n");
+    printf("|_[ ]_[ ]_[ ]_ %s _[ ]_|\n", cargo);
+    printf("   O           O\n");
     printf("小さな補給車が通り過ぎ、休息の場に少しだけ笑いが戻った。\n");
 }
 

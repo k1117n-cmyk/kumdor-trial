@@ -10,7 +10,7 @@
 #define EXP_TO_LEVEL_UP 10
 #define MAX_STAGE_COUNT 14
 #define POISON_TURN_LIMIT 3
-#define GAME_VERSION "v0.8.2"
+#define GAME_VERSION "v0.8.3"
 #define SAVE_FILE "kumdor_save.txt"
 #define SAVE_COMMAND ":save"
 #define QUIT_COMMAND ":quit"
@@ -18,6 +18,7 @@
 #define HELP_COMMAND ":help"
 #define COMMANDS_COMMAND ":commands"
 #define SHORT_HELP_COMMAND ":?"
+#define KEYMAP_COMMAND ":keys"
 #define BGM_COMMAND ":bgm"
 #define MUTE_COMMAND ":mute"
 
@@ -85,5 +86,6 @@ typedef struct {
 const Stage *get_stages(int *stage_count);
 Player create_player(void);
 int run_game(void);
+void print_finger_key_map(void);
 
 #endif

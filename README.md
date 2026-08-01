@@ -1,6 +1,6 @@
 # クムドールの試練
 
-Version: `v0.8.2`
+Version: `v0.8.3`
 
 C言語製のターミナルタイピングRPGです。
 
@@ -145,6 +145,7 @@ KUMDOR_NO_BGM=1 ./kumdor_01
 | `:help` | ヘルプを表示 |
 | `:commands` | ヘルプを表示 |
 | `:?` | ヘルプを表示 |
+| `:keys` | 指とキーの対応を表示 |
 | `:bgm` | BGMのON/OFFを切り替え |
 | `:mute` | BGMのON/OFFを切り替え |
 | `:save` | 現在ステージの入口に記録を刻む |
