@@ -10,7 +10,7 @@
 #define EXP_TO_LEVEL_UP 10
 #define MAX_STAGE_COUNT 20
 #define POISON_TURN_LIMIT 3
-#define GAME_VERSION "v0.10.0"
+#define GAME_VERSION "v0.10.1"
 #define SAVE_FILE "kumdor_save.txt"
 #define SAVE_COMMAND ":save"
 #define QUIT_COMMAND ":quit"

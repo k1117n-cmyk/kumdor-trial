@@ -100,15 +100,15 @@ run_case "v3" "$v3_save" "記録の石板を読み込んだ"
 run_case "v4" "$v4_save" "記録の石板を読み込んだ"
 run_case "v5" "$v5_save" "記録の石板を読み込んだ"
 run_case "bad-header" "$bad_header_save" "記録の刻印が読み取れません" 'y
-1
+2
 :savequit'
 run_case "complete" "$complete_save" "完全勝利の証が刻まれています" 'y
-1
+2
 :savequit'
 
 v6_case_dir="$TMP_DIR/save-v6"
 mkdir -p "$v6_case_dir"
-output=$(cd "$v6_case_dir" && printf '1\n:savequit\n' | KUMDOR_NO_BGM=1 "$GAME")
+output=$(cd "$v6_case_dir" && printf '2\n:savequit\n' | KUMDOR_NO_BGM=1 "$GAME")
 printf '%s' "$output" | grep -q "記録を刻んだ。ここで剣を収める。"
 head -n 1 "$v6_case_dir/kumdor_save.txt" | grep -q '^KUMDOR_SAVE_V6 '
 head -n 1 "$v6_case_dir/kumdor_save.txt" | grep -q ' 20$'

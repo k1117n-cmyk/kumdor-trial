@@ -351,7 +351,7 @@ int run_game(void) {
             print_prologue();
         } else {
             prepare_entry_player(&player, start_stage);
-            printf("\n%s【本編エントリー】%s第%dステージから練習を始めます。\n\n",
+            printf("\n%s【ステージ選択】%s第%dステージから練習を始めます。\n\n",
                    color(COLOR_CYAN),
                    color(COLOR_RESET),
                    start_stage + 1);
@@ -494,7 +494,7 @@ static int run_main_entry_menu(int stage_count) {
     long choice;
 
     while (1) {
-        printf("\n%s【本編エントリー】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+        printf("\n%s【ステージ選択】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
         printf("練習したい区切りから本編を始められます。\n");
         for (int i = 0; i < entry_count; i++) {
             if (main_entry_points[i].stage_number <= stage_count) {
@@ -619,9 +619,9 @@ static int prompt_start_choice(void) {
 
     printf("%s【最初のメニュー】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
     printf("0: ゲームの遊び方\n");
-    printf("1: ゲームを始める\n");
-    printf("2: プレステージで練習する\n");
-    printf("3: 本編の途中から練習する\n");
+    printf("1: プレステージで練習する\n");
+    printf("2: ゲームを始める\n");
+    printf("3: ステージを選ぶ\n");
     printf("q: 終了\n");
     printf("選択: ");
 
@@ -630,7 +630,7 @@ static int prompt_start_choice(void) {
         return -2;
     }
 
-    if (input[0] == '\0' || strcmp(input, "1") == 0) {
+    if (input[0] == '\0' || strcmp(input, "2") == 0) {
         return 1;
     }
 
@@ -638,7 +638,7 @@ static int prompt_start_choice(void) {
         return 0;
     }
 
-    if (strcmp(input, "2") == 0) {
+    if (strcmp(input, "1") == 0) {
         return 2;
     }
 
