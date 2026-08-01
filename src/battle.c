@@ -29,7 +29,7 @@ static const char *status_name(unsigned char status);
 static const char *enemy_trait_name(EnemyTrait trait);
 static const char *enemy_trait_description(EnemyTrait trait);
 static void print_help(void);
-static int read_input(char input[], int hide_echo, int lock_edit);
+static int read_input(char input[], int hide_echo);
 static int is_correct_input(const char input[], const char target[]);
 static void print_miss_hint(const char input[], const char target[]);
 static const char *choose_message(const char *const messages[], int message_count);
@@ -92,7 +92,7 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
     print_enemy_intent(intent, enemy);
 
     if (player->status & STATUS_BLIND) {
-        printf("%s[課題]%s %s%s%s %s[鍵] 暗闇: 入力非表示・修正不可%s\n",
+        printf("%s[課題]%s %s%s%s %s(暗闇: 入力は表示されない)%s\n",
                color(COLOR_YELLOW),
                color(COLOR_RESET),
                color(COLOR_YELLOW),
@@ -109,7 +109,7 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
                color(COLOR_RESET));
     }
 
-    if (!read_input(input, (player->status & STATUS_BLIND) != 0, (player->status & STATUS_BLIND) != 0)) {
+    if (!read_input(input, (player->status & STATUS_BLIND) != 0)) {
         int was_poisoned = (player->status & STATUS_POISON) != 0;
 
         printf("%s➔ 入力が読み取れなかった！ 反撃を受ける！%s\n",
@@ -252,7 +252,7 @@ static const char *enemy_trait_description(EnemyTrait trait) {
         case ENEMY_TRAIT_POISON_EDGE:
             return "反撃時と敵が本気を出した後に毒を付与し、失敗が続くと追加ダメージを与える";
         case ENEMY_TRAIT_BLIND_EDGE:
-            return "反撃時と敵が本気を出した後に暗闇を付与し、入力を見えなくして修正不可にする";
+            return "反撃時と敵が本気を出した後に暗闇を付与し、入力を見えなくする";
         case ENEMY_TRAIT_REGEN_COUNTER:
             return "本気状態中の反撃時に自分のHPを1回復する";
         case ENEMY_TRAIT_STANDARD:
@@ -266,7 +266,7 @@ static void print_help(void) {
     printf("[課題] に表示された文字列を完全一致で入力すると攻撃します。大文字・小文字、スペース、記号も区別します。\n");
     printf("[状態] にはHP、状態異常、敵HPが表示されます。\n");
     printf("毒状態では、正解しても攻撃できず毒の解除に使われます。毒中に失敗が続くと追加ダメージを受けます。\n");
-    printf("暗闇状態では、入力中の文字が画面に表示されず、Backspace/Deleteで修正できません。正解すると解除されます。\n");
+    printf("暗闇状態では、入力中の文字が画面に表示されません。正解すると解除されます。\n");
     printf("タイプミスすると敵が反撃し、入力のずれに応じた短いヒントが出ます。\n");
     printf("3連続正解するたびに追加の一撃が入ります。\n");
     printf("コマンド入力はターンを消費しません。\n");
@@ -279,16 +279,15 @@ static void print_help(void) {
     printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n\n", MUTE_COMMAND);
 }
 
-static int read_input(char input[], int hide_echo, int lock_edit) {
+static int read_input(char input[], int hide_echo) {
 #if defined(__unix__) || defined(__APPLE__)
     struct termios old_terminal;
     struct termios hidden_terminal;
     int echo_hidden = 0;
-    int edit_locked = 0;
 #endif
 
     if (hide_echo) {
-        printf("[鍵] 課題を入力してEnter（暗闇: 入力は表示されません / 修正不可 / :helpでヘルプ）: ");
+        printf("課題を入力してEnter（暗闇: 入力は表示されません / :helpでヘルプ）: ");
     } else {
         printf("課題を入力してEnter（:helpでヘルプ）: ");
     }
@@ -298,48 +297,9 @@ static int read_input(char input[], int hide_echo, int lock_edit) {
     if (hide_echo && isatty(STDIN_FILENO) && tcgetattr(STDIN_FILENO, &old_terminal) == 0) {
         hidden_terminal = old_terminal;
         hidden_terminal.c_lflag &= (tcflag_t)~ECHO;
-        if (lock_edit) {
-            hidden_terminal.c_lflag &= (tcflag_t)~ICANON;
-            hidden_terminal.c_cc[VMIN] = 1;
-            hidden_terminal.c_cc[VTIME] = 0;
-        }
         if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &hidden_terminal) == 0) {
             echo_hidden = 1;
-            edit_locked = lock_edit;
         }
-    }
-#endif
-
-#if defined(__unix__) || defined(__APPLE__)
-    if (edit_locked) {
-        size_t input_length = 0;
-
-        while (input_length + 1 < INPUT_BUFFER_SIZE) {
-            char ch;
-            ssize_t read_count = read(STDIN_FILENO, &ch, 1);
-
-            if (read_count <= 0) {
-                tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_terminal);
-                printf("\n");
-                return 0;
-            }
-
-            if (ch == '\n' || ch == '\r') {
-                break;
-            }
-
-            if (ch == '\b' || ch == 127) {
-                continue;
-            }
-
-            input[input_length] = ch;
-            input_length++;
-        }
-
-        input[input_length] = '\0';
-        tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_terminal);
-        printf("\n");
-        return 1;
     }
 #endif
 
