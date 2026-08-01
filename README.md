@@ -22,6 +22,8 @@ make
 make run
 ```
 
+更新内容は [CHANGELOG.md](CHANGELOG.md) にまとめています。
+
 ## 現在の内容
 
 - C言語製のターミナルタイピングRPG
