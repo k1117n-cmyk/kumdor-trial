@@ -565,9 +565,9 @@ static void run_prestage_menu(void) {
 
     start_random_prestage_bgm();
 
-    printf("%s【プレステージ】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
-    printf("本編の前に、キーと指の対応を短く練習できます。ミスしてもHPは減りません。\n");
-    printf("Enterで全部練習、数字で個別練習、bで最初のメニューへ戻ります。\n");
+    printf("%s【ビッグハンド訓練場】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("本編の前に、巨大な手の訓練装置でキーと指の対応を練習できます。ミスしてもHPは減りません。\n");
+    printf("Enterで全部のレッスン、数字で個別レッスン、bで最初のメニューへ戻ります。\n");
     printf("メニュー中も :help / :bgm / :mute を使えます。\n");
     print_finger_key_map();
 
@@ -598,9 +598,9 @@ static void run_prestage_menu(void) {
 
         if (choice >= 1 && choice <= prestage_count) {
             if (run_prestage(&prestages[choice - 1], choice)) {
-                printf("\nプレステージを終えました。最初のメニューへ戻ります。\n\n");
+                printf("\nビッグハンドのレッスンを終えました。最初のメニューへ戻ります。\n\n");
             } else {
-                printf("\nプレステージを中断しました。最初のメニューへ戻ります。\n\n");
+                printf("\nビッグハンドのレッスンを中断しました。最初のメニューへ戻ります。\n\n");
             }
             stop_bgm();
             return;
@@ -626,7 +626,7 @@ static void print_how_to_play(void) {
            SAVE_COMMAND,
            QUIT_COMMAND,
            HELP_COMMAND);
-    printf("指の位置に不安がある場合は、先にプレステージで練習できます。\n");
+    printf("指の位置に不安がある場合は、先にビッグハンド訓練場で練習できます。\n");
     printf("%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
     printf("Enterで最初のメニューへ戻る: ");
     read_line(input);
@@ -638,7 +638,7 @@ static int prompt_start_choice(void) {
 
     printf("%s【最初のメニュー】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
     printf("0: ゲームの遊び方\n");
-    printf("1: プレステージで練習する\n");
+    printf("1: ビッグハンド訓練場で練習する\n");
     printf("2: ゲームを始める\n");
     printf("3: ステージを選ぶ\n");
     printf("q: 終了\n");
@@ -681,7 +681,7 @@ static int prompt_prestage_choice(void) {
     long choice;
 
     printf("\n");
-    printf("Enter: 全部練習 / b: 戻る / :help: ヘルプ / :bgm: BGM切替\n");
+    printf("Enter: 全部レッスン / b: 戻る / :help: ヘルプ / :bgm: BGM切替\n");
     for (int i = 0; i < prestage_count; i++) {
         printf("%d: %s\n", i + 1, prestages[i].name);
     }
@@ -729,12 +729,12 @@ static void run_all_prestages(void) {
 
     for (int i = 0; i < prestage_count; i++) {
         if (!run_prestage(&prestages[i], i + 1)) {
-            printf("\nプレステージを中断しました。最初のメニューへ戻ります。\n\n");
+            printf("\nビッグハンドのレッスンを中断しました。最初のメニューへ戻ります。\n\n");
             return;
         }
     }
 
-    printf("\nすべてのプレステージを終えました。最初のメニューへ戻ります。\n\n");
+    printf("\nすべてのビッグハンドレッスンを終えました。最初のメニューへ戻ります。\n\n");
 }
 
 static int run_prestage(const PreStage *prestage, int prestage_number) {
@@ -749,7 +749,7 @@ static int run_prestage(const PreStage *prestage, int prestage_number) {
         int remaining_count = prestage->target_count - i;
 
         while (1) {
-            printf("%s[練習 %d/%d]%s %s%s%s\n",
+            printf("%s[ビッグハンド %d/%d]%s %s%s%s\n",
                    color(COLOR_YELLOW),
                    remaining_count,
                    prestage->target_count,
@@ -768,7 +768,7 @@ static int run_prestage(const PreStage *prestage, int prestage_number) {
                 strcmp(input, ":Q") == 0 ||
                 strcmp(input, "q") == 0 ||
                 strcmp(input, "Q") == 0) {
-                printf("このプレステージを終了します。\n");
+                printf("このビッグハンドレッスンを終了します。\n");
                 return 0;
             }
 
@@ -786,14 +786,14 @@ static int run_prestage(const PreStage *prestage, int prestage_number) {
 
             if (strcmp(input, target) == 0) {
                 correct_count++;
-                printf("%sOK%s 指の位置を保ったまま次へ進みます。\n",
+                printf("%sOK%s ビッグハンドがうなずいた。指の位置を保ったまま次へ進みます。\n",
                        color(COLOR_GREEN),
                        color(COLOR_RESET));
                 break;
             }
 
             miss_count++;
-            printf("%sもう一度。%s 目で課題を確認して、ゆっくり同じ順番で打ちます。\n",
+            printf("%sもう一度。%s ビッグハンドが同じ課題を差し出した。ゆっくり同じ順番で打ちます。\n",
                    color(COLOR_RED),
                    color(COLOR_RESET));
         }
@@ -810,12 +810,13 @@ static int run_prestage(const PreStage *prestage, int prestage_number) {
 
 static void print_prestage_intro(const PreStage *prestage, int prestage_number) {
     printf("\n%s=========================================%s\n", color(COLOR_CYAN), color(COLOR_RESET));
-    printf("%s【プレステージ%d: %s】%s\n",
+    printf("%s【ビッグハンド レッスン%d: %s】%s\n",
            color(COLOR_YELLOW),
            prestage_number,
            prestage->name,
            color(COLOR_RESET));
     printf("練習内容: %s\n", prestage->lesson);
+    printf("訓練装置: ビッグハンド\n");
     printf("今回のキー: %s\n", prestage->keys);
     printf("担当指  : %s\n", prestage->fingers);
     printf("指使い  : %s\n", prestage->tip);
@@ -824,13 +825,13 @@ static void print_prestage_intro(const PreStage *prestage, int prestage_number) 
 }
 
 static void print_prestage_help(void) {
-    printf("\n%s【プレステージ ヘルプ】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
-    printf("表示された練習課題を、そのまま正確に入力してEnterを押します。\n");
-    printf("ミスしてもHPは減らず、同じ課題をもう一度練習します。\n");
+    printf("\n%s【ビッグハンド ヘルプ】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+    printf("ビッグハンドが差し出す練習課題を、そのまま正確に入力してEnterを押します。\n");
+    printf("ミスしてもHPは減らず、ビッグハンドが同じ課題をもう一度出します。\n");
     printf("練習カウントは残り数です。正解すると 8/8 から 7/8 のように減っていきます。\n");
-    printf("メニューではEnterで全部練習、数字で個別練習、bで最初のメニューへ戻ります。\n");
+    printf("メニューではEnterで全部レッスン、数字で個別レッスン、bで最初のメニューへ戻ります。\n");
     printf("コマンド:\n");
-    printf("  %-10s このプレステージを終了して最初のメニューへ戻る\n", ":q");
+    printf("  %-10s このビッグハンドレッスンを終了して最初のメニューへ戻る\n", ":q");
     printf("  %-10s このヘルプを表示\n", HELP_COMMAND);
     printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n", BGM_COMMAND);
     printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n\n", MUTE_COMMAND);
