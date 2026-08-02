@@ -828,6 +828,7 @@ static void print_prestage_help(void) {
     printf("\n%s【ビッグハンド ヘルプ】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
     printf("ビッグハンドが差し出す練習課題を、そのまま正確に入力してEnterを押します。\n");
     printf("ミスしてもHPは減らず、ビッグハンドが同じ課題をもう一度出します。\n");
+    printf("キーを押すと、その文字はOSを通ってこのゲームへ届き、課題と完全一致で比べられます。\n");
     printf("練習カウントは残り数です。正解すると 8/8 から 7/8 のように減っていきます。\n");
     printf("メニューではEnterで全部レッスン、数字で個別レッスン、bで最初のメニューへ戻ります。\n");
     printf("コマンド:\n");
