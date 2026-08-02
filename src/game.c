@@ -1313,7 +1313,7 @@ static void gain_exp(Player *player, int exp) {
         player->max_hp += 2;
         player->hp = player->max_hp;
 
-        printf("%s【レベルアップ】Lv:%d 最大HPが%dになった！ HP全回復！%s\n",
+        printf("%s【レベルアップ】ライフの箱がひとつ灯った！ Lv:%d 最大HPが%dになった！ HP全回復！%s\n",
                color(COLOR_GREEN),
                player->level,
                player->max_hp,

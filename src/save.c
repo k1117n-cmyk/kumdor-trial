@@ -42,7 +42,7 @@ int load_game(Player *player, int *start_stage, int stage_count) {
         return 0;
     }
 
-    printf("記録の石板が見つかりました。\n");
+    printf("セーブゾーンに記録の石板が見つかりました。\n");
     printf("前回の続きから始めますか？ (y/n): ");
     if (fgets(answer, INPUT_BUFFER_SIZE, stdin) == NULL) {
         fclose(file);
@@ -208,7 +208,7 @@ int load_game(Player *player, int *start_stage, int stage_count) {
     *player = loaded_player;
     *start_stage = next_stage;
 
-    printf("記録の石板を読み込んだ。第%dステージの入口から再開する。\n", *start_stage + 1);
+    printf("セーブゾーンの記録を読み込んだ。第%dステージの入口から再開する。\n", *start_stage + 1);
     return 1;
 }
 
@@ -217,7 +217,7 @@ int save_game(const Player *player, int next_stage, int stage_count) {
     unsigned int saved_status = STATUS_NORMAL;
 
     if (file == NULL) {
-        printf("%s[記録]%s 記録の石板に刻めませんでした。\n",
+        printf("%s[セーブゾーン]%s 記録の石板に刻めませんでした。\n",
                color(COLOR_BLUE),
                color(COLOR_RESET));
         return 0;
@@ -250,12 +250,12 @@ int save_game(const Player *player, int next_stage, int stage_count) {
     fclose(file);
 
     if (next_stage < stage_count) {
-        printf("%s[記録]%s 第%dステージの入口に記録を刻みました。\n",
+        printf("%s[セーブゾーン]%s 第%dステージの入口に記録を刻みました。\n",
                color(COLOR_BLUE),
                color(COLOR_RESET),
                next_stage + 1);
     } else {
-        printf("%s[記録]%s 完全勝利の証を石板に刻みました。\n",
+        printf("%s[セーブゾーン]%s 完全勝利の証を石板に刻みました。\n",
                color(COLOR_BLUE),
                color(COLOR_RESET));
     }

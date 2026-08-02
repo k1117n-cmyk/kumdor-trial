@@ -94,11 +94,11 @@ complete_save='KUMDOR_SAVE_V3 10 10 10 0 10 0 0 10 2 0
 0 0 0 0
 0 0 0 0'
 
-run_case "v1" "$v1_save" "記録の石板を読み込んだ"
-run_case "v2" "$v2_save" "記録の石板を読み込んだ"
-run_case "v3" "$v3_save" "記録の石板を読み込んだ"
-run_case "v4" "$v4_save" "記録の石板を読み込んだ"
-run_case "v5" "$v5_save" "記録の石板を読み込んだ"
+run_case "v1" "$v1_save" "セーブゾーンの記録を読み込んだ"
+run_case "v2" "$v2_save" "セーブゾーンの記録を読み込んだ"
+run_case "v3" "$v3_save" "セーブゾーンの記録を読み込んだ"
+run_case "v4" "$v4_save" "セーブゾーンの記録を読み込んだ"
+run_case "v5" "$v5_save" "セーブゾーンの記録を読み込んだ"
 run_case "bad-header" "$bad_header_save" "記録の刻印が読み取れません" 'y
 2
 :savequit'
