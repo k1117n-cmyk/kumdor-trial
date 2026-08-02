@@ -639,7 +639,7 @@ static int prompt_start_choice(void) {
     printf("%s【最初のメニュー】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
     printf("0: ゲームの遊び方\n");
     printf("1: ビッグハンド訓練場で練習する\n");
-    printf("2: ゲームを始める\n");
+    printf("2: クムドールへ向かう\n");
     printf("3: ステージを選ぶ\n");
     printf("q: 終了\n");
     printf("選択: ");
