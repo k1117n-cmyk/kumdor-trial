@@ -5,12 +5,13 @@
 #define STATUS_POISON 0x01
 #define STATUS_BLIND  0x02
 #define STATUS_LOCKED 0x04
+#define STATUS_TIMED  0x08
 
 #define INPUT_BUFFER_SIZE 64
 #define EXP_TO_LEVEL_UP 10
 #define MAX_STAGE_COUNT 20
 #define POISON_TURN_LIMIT 3
-#define GAME_VERSION "v0.10.1"
+#define GAME_VERSION "v0.10.2"
 #define SAVE_FILE "kumdor_save.txt"
 #define SAVE_COMMAND ":save"
 #define QUIT_COMMAND ":quit"

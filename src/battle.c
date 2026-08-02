@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #if defined(__unix__) || defined(__APPLE__)
 #include <termios.h>
@@ -17,6 +18,8 @@
 #define COLOR_YELLOW "\033[33m"
 #define COLOR_BLUE   "\033[34m"
 #define COLOR_MAGENTA "\033[35m"
+#define TIMED_MIN_SECONDS 4.0
+#define TIMED_MAX_SECONDS 12.0
 typedef enum {
     ENEMY_INTENT_NONE,
     ENEMY_INTENT_HEAVY,
@@ -29,14 +32,16 @@ static const char *status_name(unsigned char status);
 static const char *enemy_trait_name(EnemyTrait trait);
 static const char *enemy_trait_description(EnemyTrait trait);
 static void print_help(void);
-static int read_input(char input[], int hide_echo, int lock_edit);
+static int read_input(char input[], int hide_echo, int lock_edit, int time_limited, double time_limit_seconds);
 static int is_correct_input(const char input[], const char target[]);
 static void print_miss_hint(const char input[], const char target[]);
 static const char *choose_message(const char *const messages[], int message_count);
 static void print_stage_miss_quote(const Stage *stage);
 static EnemyIntent choose_enemy_intent(const Enemy *enemy, int is_climax);
 static void print_enemy_intent(EnemyIntent intent, const Enemy *enemy);
-static void apply_miss_blind(Player *player, int current_stage);
+static double monotonic_seconds(void);
+static double time_limit_for_target(const char target[], int current_stage);
+static void apply_miss_penalty(Player *player, int current_stage);
 static void apply_poison(Player *player, const char message[]);
 static void tick_poison(Player *player);
 static void maybe_apply_climax_poison(Player *player, const Enemy *enemy, int is_climax);
@@ -86,28 +91,46 @@ void print_battle_status(const Player *player, const Enemy *enemy) {
 int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char target[], int current_stage, int stage_count, int is_climax) {
     char input[INPUT_BUFFER_SIZE];
     EnemyIntent intent = choose_enemy_intent(enemy, is_climax);
+    double time_limit_seconds = time_limit_for_target(target, current_stage);
+    double input_started_at = 0.0;
+    double input_elapsed = 0.0;
+    int is_time_limited = (player->status & STATUS_TIMED) != 0;
 
     maybe_apply_climax_poison(player, enemy, is_climax);
     maybe_apply_climax_blind(player, enemy, is_climax);
     print_enemy_intent(intent, enemy);
 
     if (player->status & STATUS_BLIND) {
-        printf("%s[課題]%s %s%s%s %s(暗闇: 入力は表示されない)%s\n",
+        printf("%s[課題]%s %s%s%s %s(暗闇: 入力は表示されない%s%s)%s\n",
                color(COLOR_YELLOW),
                color(COLOR_RESET),
                color(COLOR_YELLOW),
                target,
                color(COLOR_RESET),
                color(COLOR_RED),
+               is_time_limited ? " / 時間制限: " : "",
+               is_time_limited ? "あり" : "",
                color(COLOR_RESET));
     } else if (player->status & STATUS_LOCKED) {
-        printf("%s[課題]%s %s%s%s %s(修正不可: Backspace/Delete無効)%s\n",
+        printf("%s[課題]%s %s%s%s %s(修正不可: Backspace/Delete無効%s%s)%s\n",
                color(COLOR_YELLOW),
                color(COLOR_RESET),
                color(COLOR_YELLOW),
                target,
                color(COLOR_RESET),
                color(COLOR_RED),
+               is_time_limited ? " / 時間制限: " : "",
+               is_time_limited ? "あり" : "",
+               color(COLOR_RESET));
+    } else if (is_time_limited) {
+        printf("%s[課題]%s %s%s%s %s(時間制限: %.1f秒以内)%s\n",
+               color(COLOR_YELLOW),
+               color(COLOR_RESET),
+               color(COLOR_YELLOW),
+               target,
+               color(COLOR_RESET),
+               color(COLOR_RED),
+               time_limit_seconds,
                color(COLOR_RESET));
     } else {
         printf("%s[課題]%s %s%s%s\n",
@@ -118,7 +141,8 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
                color(COLOR_RESET));
     }
 
-    if (!read_input(input, (player->status & STATUS_BLIND) != 0, (player->status & STATUS_LOCKED) != 0)) {
+    input_started_at = monotonic_seconds();
+    if (!read_input(input, (player->status & STATUS_BLIND) != 0, (player->status & STATUS_LOCKED) != 0, is_time_limited, time_limit_seconds)) {
         int was_poisoned = (player->status & STATUS_POISON) != 0;
 
         printf("%s➔ 入力が読み取れなかった！ 反撃を受ける！%s\n",
@@ -133,6 +157,7 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
         }
         return 1;
     }
+    input_elapsed = monotonic_seconds() - input_started_at;
 
     if (strcmp(input, HELP_COMMAND) == 0 ||
         strcmp(input, COMMANDS_COMMAND) == 0 ||
@@ -168,6 +193,26 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
         save_game(player, current_stage, stage_count);
         printf("%s➔ 記録を刻んだ。ここで剣を収める。%s\n", color(COLOR_BLUE), color(COLOR_RESET));
         return 0;
+    }
+
+    if (is_time_limited && input_elapsed > time_limit_seconds) {
+        int was_poisoned = (player->status & STATUS_POISON) != 0;
+
+        player->miss_count++;
+        player->stage_miss_counts[current_stage]++;
+        player->combo_count = 0;
+        player->status &= ~STATUS_TIMED;
+        printf("%s➔ 時間切れ！ %.1f秒を超えた！（反撃を受ける！）%s\n",
+               color(COLOR_RED),
+               time_limit_seconds,
+               color(COLOR_RESET));
+        print_stage_miss_quote(stage);
+        enemy_turn(player, enemy, intent);
+        if (was_poisoned) {
+            tick_poison(player);
+        }
+        apply_miss_penalty(player, current_stage);
+        return 1;
     }
 
     if (is_correct_input(input, target)) {
@@ -210,6 +255,10 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
             player->status &= ~STATUS_LOCKED;
             printf("%s（指先のこわばりが解けた！）%s\n", color(COLOR_GREEN), color(COLOR_RESET));
         }
+        if (player->status & STATUS_TIMED) {
+            player->status &= ~STATUS_TIMED;
+            printf("%s（砂時計の圧が消えた！）%s\n", color(COLOR_GREEN), color(COLOR_RESET));
+        }
     } else {
         int was_poisoned = (player->status & STATUS_POISON) != 0;
 
@@ -225,15 +274,35 @@ int player_turn(Player *player, Enemy *enemy, const Stage *stage, const char tar
         if (was_poisoned) {
             tick_poison(player);
         }
-        apply_miss_blind(player, current_stage);
+        if (player->status & STATUS_TIMED) {
+            player->status &= ~STATUS_TIMED;
+            printf("%s（砂時計の圧は消えた。）%s\n", color(COLOR_YELLOW), color(COLOR_RESET));
+        }
+        apply_miss_penalty(player, current_stage);
     }
 
     return 1;
 }
 
 static const char *status_name(unsigned char status) {
+    if ((status & STATUS_POISON) && (status & STATUS_BLIND) && (status & STATUS_LOCKED) && (status & STATUS_TIMED)) {
+        return "毒+暗闇+修正不可+時間制限";
+    }
+
     if ((status & STATUS_POISON) && (status & STATUS_BLIND) && (status & STATUS_LOCKED)) {
         return "毒+暗闇+修正不可";
+    }
+
+    if ((status & STATUS_POISON) && (status & STATUS_BLIND) && (status & STATUS_TIMED)) {
+        return "毒+暗闇+時間制限";
+    }
+
+    if ((status & STATUS_POISON) && (status & STATUS_LOCKED) && (status & STATUS_TIMED)) {
+        return "毒+修正不可+時間制限";
+    }
+
+    if ((status & STATUS_BLIND) && (status & STATUS_LOCKED) && (status & STATUS_TIMED)) {
+        return "暗闇+修正不可+時間制限";
     }
 
     if ((status & STATUS_POISON) && (status & STATUS_BLIND)) {
@@ -248,6 +317,18 @@ static const char *status_name(unsigned char status) {
         return "暗闇+修正不可";
     }
 
+    if ((status & STATUS_POISON) && (status & STATUS_TIMED)) {
+        return "毒+時間制限";
+    }
+
+    if ((status & STATUS_BLIND) && (status & STATUS_TIMED)) {
+        return "暗闇+時間制限";
+    }
+
+    if ((status & STATUS_LOCKED) && (status & STATUS_TIMED)) {
+        return "修正不可+時間制限";
+    }
+
     if (status & STATUS_POISON) {
         return "毒";
     }
@@ -258,6 +339,10 @@ static const char *status_name(unsigned char status) {
 
     if (status & STATUS_LOCKED) {
         return "修正不可";
+    }
+
+    if (status & STATUS_TIMED) {
+        return "時間制限";
     }
 
     return "通常";
@@ -301,6 +386,7 @@ static void print_help(void) {
     printf("[状態] にはHP、状態異常、敵HPが表示されます。\n");
     printf("毒状態では、正解しても攻撃できず毒の解除に使われます。毒中に失敗が続くと追加ダメージを受けます。\n");
     printf("暗闇状態では、入力中の文字が画面に表示されません。修正不可状態では、Backspace/Deleteで戻せません。正解すると解除されます。\n");
+    printf("時間制限状態では、表示された秒数以内に入力しないと時間切れになります。課題入力後に解除されます。\n");
     printf("タイプミスすると敵が反撃し、入力のずれに応じた短いヒントが出ます。\n");
     printf("3連続正解するたびに追加の一撃が入ります。\n");
     printf("コマンド入力はターンを消費しません。\n");
@@ -314,7 +400,7 @@ static void print_help(void) {
     printf("  %-10s BGMのON/OFFを切り替え（KUMDOR_NO_BGM=1では無効）\n\n", MUTE_COMMAND);
 }
 
-static int read_input(char input[], int hide_echo, int lock_edit) {
+static int read_input(char input[], int hide_echo, int lock_edit, int time_limited, double time_limit_seconds) {
 #if defined(__unix__) || defined(__APPLE__)
     struct termios old_terminal;
     struct termios changed_terminal;
@@ -323,9 +409,19 @@ static int read_input(char input[], int hide_echo, int lock_edit) {
 #endif
 
     if (hide_echo) {
-        printf("課題を入力してEnter（暗闇: 入力非表示 / :helpヘルプ / :keys対応表）: ");
+        if (time_limited) {
+            printf("課題を入力してEnter（暗闇: 入力非表示 / 時間制限: %.1f秒 / :helpヘルプ / :keys対応表）: ", time_limit_seconds);
+        } else {
+            printf("課題を入力してEnter（暗闇: 入力非表示 / :helpヘルプ / :keys対応表）: ");
+        }
     } else if (lock_edit) {
-        printf("課題を入力してEnter（修正不可: Backspace無効 / :helpヘルプ / :keys対応表）: ");
+        if (time_limited) {
+            printf("課題を入力してEnter（修正不可: Backspace無効 / 時間制限: %.1f秒 / :helpヘルプ / :keys対応表）: ", time_limit_seconds);
+        } else {
+            printf("課題を入力してEnter（修正不可: Backspace無効 / :helpヘルプ / :keys対応表）: ");
+        }
+    } else if (time_limited) {
+        printf("課題を入力してEnter（時間制限: %.1f秒 / :helpヘルプ / :keys対応表）: ", time_limit_seconds);
     } else {
         printf("課題を入力してEnter（:helpヘルプ / :keys対応表）: ");
     }
@@ -548,21 +644,68 @@ static void print_enemy_intent(EnemyIntent intent, const Enemy *enemy) {
     }
 }
 
-static void apply_miss_blind(Player *player, int current_stage) {
-    if (current_stage < 3 || (player->status & (STATUS_BLIND | STATUS_LOCKED))) {
+static double monotonic_seconds(void) {
+#if defined(CLOCK_MONOTONIC)
+    struct timespec now;
+
+    if (clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
+        return (double)now.tv_sec + (double)now.tv_nsec / 1000000000.0;
+    }
+#endif
+
+    return (double)time(NULL);
+}
+
+static double time_limit_for_target(const char target[], int current_stage) {
+    double seconds;
+    size_t target_length = strlen(target);
+
+    if (current_stage >= 14) {
+        seconds = 3.0 + (double)target_length * 0.32;
+    } else if (current_stage >= 10) {
+        seconds = 3.0 + (double)target_length * 0.40;
+    } else {
+        seconds = 4.0 + (double)target_length * 0.45;
+    }
+
+    if (seconds < TIMED_MIN_SECONDS) {
+        return TIMED_MIN_SECONDS;
+    }
+    if (seconds > TIMED_MAX_SECONDS) {
+        return TIMED_MAX_SECONDS;
+    }
+
+    return seconds;
+}
+
+static void apply_miss_penalty(Player *player, int current_stage) {
+    int penalty;
+
+    if (current_stage < 3 || (player->status & (STATUS_BLIND | STATUS_LOCKED | STATUS_TIMED))) {
         return;
     }
 
-    if (rand() % 2 == 0) {
-        player->status |= STATUS_BLIND;
-        printf("%s（焦りで視界が乱れた。次の入力は手元を頼れない！）%s\n",
-               color(COLOR_YELLOW),
-               color(COLOR_RESET));
-    } else {
-        player->status |= STATUS_LOCKED;
-        printf("%s（指先がこわばった。次の入力はBackspace/Deleteで戻せない！）%s\n",
-               color(COLOR_YELLOW),
-               color(COLOR_RESET));
+    penalty = rand() % 3;
+    switch (penalty) {
+        case 0:
+            player->status |= STATUS_BLIND;
+            printf("%s（焦りで視界が乱れた。次の入力は手元を頼れない！）%s\n",
+                   color(COLOR_YELLOW),
+                   color(COLOR_RESET));
+            break;
+        case 1:
+            player->status |= STATUS_LOCKED;
+            printf("%s（指先がこわばった。次の入力はBackspace/Deleteで戻せない！）%s\n",
+                   color(COLOR_YELLOW),
+                   color(COLOR_RESET));
+            break;
+        case 2:
+        default:
+            player->status |= STATUS_TIMED;
+            printf("%s（砂時計が落ち始めた。次の入力は時間内に打ち切れ！）%s\n",
+                   color(COLOR_YELLOW),
+                   color(COLOR_RESET));
+            break;
     }
 }
 

@@ -16,6 +16,9 @@
 #define COLOR_MAGENTA "\033[35m"
 #define COLOR_CYAN    "\033[36m"
 #define COLOR_BOLD    "\033[1m"
+#define NEXT_STAGE_QUIT 0
+#define NEXT_STAGE_CONTINUE 1
+#define NEXT_STAGE_MENU 2
 
 typedef struct {
     const char *name;
@@ -341,6 +344,10 @@ int run_game(void) {
 
     print_title();
     if (!load_game(&player, &start_stage, stage_count)) {
+show_start_menu:
+        player = create_player();
+        start_stage = 0;
+        quit_requested = 0;
         if (!run_start_menu(&start_stage, stage_count)) {
             printf("\n%s【終了】%sクムドールの試練を始めずに終了しました。\n",
                    color(COLOR_BLUE),
@@ -403,8 +410,19 @@ int run_game(void) {
             stop_bgm();
             apply_rest_event(&stages[stage], &player, stage);
             save_game(&player, stage + 1, stage_count);
-            if (stage + 1 < stage_count && !prompt_next_stage(stage + 2, stage_count)) {
-                quit_requested = 1;
+            if (stage + 1 < stage_count) {
+                int next_choice = prompt_next_stage(stage + 2, stage_count);
+                if (next_choice == NEXT_STAGE_MENU) {
+                    stop_bgm();
+                    printf("\n%s【最初のメニューへ戻る】%s記録は第%dステージの入口に刻まれています。\n\n",
+                           color(COLOR_BLUE),
+                           color(COLOR_RESET),
+                           stage + 2);
+                    goto show_start_menu;
+                }
+                if (next_choice == NEXT_STAGE_QUIT) {
+                    quit_requested = 1;
+                }
             }
         }
     }
@@ -1311,12 +1329,12 @@ static int prompt_next_stage(int next_stage_number, int stage_count) {
                next_stage_number,
                stage_count,
                color(COLOR_RESET));
-        printf("Enter: 進む / q: ここで剣を収める（記録済み）: ");
+        printf("Enter: 進む / b: 最初のメニューへ戻る / q: ここで剣を収める（記録済み）: ");
 
         if (fgets(input, INPUT_BUFFER_SIZE, stdin) == NULL) {
             printf("\n入力が途切れた。次は第%dステージの入口に刻まれた記録から再開する。\n",
                    next_stage_number);
-            return 0;
+            return NEXT_STAGE_QUIT;
         }
 
         input[strcspn(input, "\n")] = '\0';
@@ -1324,7 +1342,14 @@ static int prompt_next_stage(int next_stage_number, int stage_count) {
         if (input[0] == '\0' ||
             strcmp(input, "next") == 0 ||
             strcmp(input, "NEXT") == 0) {
-            return 1;
+            return NEXT_STAGE_CONTINUE;
+        }
+
+        if (strcmp(input, "b") == 0 ||
+            strcmp(input, "B") == 0 ||
+            strcmp(input, "back") == 0 ||
+            strcmp(input, "BACK") == 0) {
+            return NEXT_STAGE_MENU;
         }
 
         if (strcmp(input, "q") == 0 ||
@@ -1333,10 +1358,10 @@ static int prompt_next_stage(int next_stage_number, int stage_count) {
             strcmp(input, QUIT_COMMAND) == 0 ||
             strcmp(input, SAVE_QUIT_COMMAND) == 0) {
             printf("次は第%dステージの入口に刻まれた記録から再開する。\n", next_stage_number);
-            return 0;
+            return NEXT_STAGE_QUIT;
         }
 
-        printf("道が定まらない。進むならEnter、剣を収めるならqを入力してください。\n");
+        printf("道が定まらない。進むならEnter、戻るならb、剣を収めるならqを入力してください。\n");
     }
 }
 
