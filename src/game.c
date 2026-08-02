@@ -358,7 +358,7 @@ show_start_menu:
             print_prologue();
         } else {
             prepare_entry_player(&player, start_stage);
-            printf("\n%s【ステージ選択】%s第%dステージから練習を始めます。\n\n",
+            printf("\n%s【旅の分岐】%s第%dステージから練習を始めます。\n\n",
                    color(COLOR_CYAN),
                    color(COLOR_RESET),
                    start_stage + 1);
@@ -513,8 +513,8 @@ static int run_main_entry_menu(int stage_count) {
     long choice;
 
     while (1) {
-        printf("\n%s【ステージ選択】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
-        printf("練習したい区切りから本編を始められます。\n");
+        printf("\n%s【旅の分岐】%s\n", color(COLOR_CYAN), color(COLOR_RESET));
+        printf("旅を再開したい区切りから本編を始められます。\n");
         for (int i = 0; i < entry_count; i++) {
             if (main_entry_points[i].stage_number <= stage_count) {
                 printf("%d: 第%dステージから - %s\n",
@@ -640,7 +640,7 @@ static int prompt_start_choice(void) {
     printf("0: ゲームの遊び方\n");
     printf("1: ビッグハンド訓練場で練習する\n");
     printf("2: クムドールへ向かう\n");
-    printf("3: ステージを選ぶ\n");
+    printf("3: 旅の途中から始める\n");
     printf("q: 終了\n");
     printf("選択: ");
 
